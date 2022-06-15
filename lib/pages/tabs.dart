@@ -53,9 +53,10 @@ class _TabsState extends State<Tabs> {
   final List<String> _titles = [('債務'), (''), ('記錄總覽')];
 
   void _onItemTapped(int index) {
+    //問ari 要怎麼藉由這種方式讓建立玩可以重新刷新，這次先把回上一頁取消，直接傳路由的方式刷新
     index == 1
-        ? (Navigator.pushNamed(context, '/add', arguments: groupIndex)
-            .then((value) => print("value:$value")))
+        ? (Navigator.pushReplacementNamed(context, '/add',
+            arguments: groupIndex)) //直接刪除「前1個」 route，push到新 route，stack就不會有這層
         : setState(() {
             print('tabs index:$groupIndex'); //test
             _selectedIndex = index;
@@ -98,7 +99,8 @@ class _TabsState extends State<Tabs> {
             foregroundColor: Colors.white,
             focusColor: const Color.fromARGB(255, 242, 187, 119),
             onPressed: () {
-              Navigator.pushNamed(context, '/add', arguments: groupIndex);
+              Navigator.pushReplacementNamed(context, '/add',
+                  arguments: groupIndex);
             },
           )),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

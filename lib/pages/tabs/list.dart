@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:grouped_list/grouped_list.dart';
+import "package:collection/collection.dart"; //引入groupby fn
 
 import 'package:flutter_ourbill/data/json.dart';
 import 'data/json.dart'; //假資料
 
 class BillList extends StatefulWidget {
-  int? index;
+  int index;
   BillList(this.index, {Key? key}) : super(key: key);
 
   @override
@@ -14,7 +16,9 @@ class BillList extends StatefulWidget {
 }
 
 class _BillListState extends State<BillList> {
-  var _DATA;
+  List<dynamic> _AllDATA = [];
+  List<dynamic> _ListDATA = [];
+
 //  初始化：先從SP讀取資料
   @override
   void initState() {
@@ -24,73 +28,120 @@ class _BillListState extends State<BillList> {
 
   _loadDATA() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _DATA = json.decode(_prefs.getString('DATA') ?? '')[widget.index];
-    });
+    _AllDATA = json.decode(_prefs.getString('DATA') ?? '');
+    _ListDATA =
+        json.decode(_prefs.getString('DATA') ?? '')[widget.index]['list'];
+    print("_DATA:$_ListDATA");
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20),
-      child: ListView(children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${_DATA}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+        padding: const EdgeInsets.all(20),
+        child: GroupedListView<dynamic, String>(
+          //使用套件照日期組數排序
+          elements: _ListDATA,
+          groupBy: (element) => element['date'],
+          useStickyGroupSeparators: true,
+          groupComparator: (value1, value2) => value2.compareTo(value1),
+          itemComparator: (item1, item2) =>
+              item1['time'].compareTo(item2['time']),
+          order: GroupedListOrder.ASC, //排序方式
+          groupSeparatorBuilder: (String value) => Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              value,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            Card(
-              margin: const EdgeInsets.only(top: 5, bottom: 20),
-              color: Colors.white,
-              elevation: 6.0,
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15))),
-              child: SizedBox(
-                height: 80,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    ListTile(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/spendDetail');
-                      }, //點擊,
-                      leading: Container(
-                        padding: const EdgeInsets.only(right: 15.0),
-                        decoration: const BoxDecoration(
-                            border: Border(
-                          right: BorderSide(
-                            // 灰線條
-                            color: Colors.black12,
-                            width: 2.0,
-                          ),
-                        )),
-                        child: const CircleAvatar(
-                          backgroundColor: Colors.black26,
+          ),
+          indexedItemBuilder: (c, element, index) {
+            return Dismissible(
+                //滑動刪除
+                key: UniqueKey(), //每一個Dismissible都必須有專屬的key，讓Flutter能夠辨識
+                onDismissed: (direction) async {
+                  //滑動後要做的事
+                  SharedPreferences _prefs =
+                      await SharedPreferences.getInstance(); //更新SP
+                  _ListDATA.removeAt(index);
+                  _AllDATA[widget.index]['list'] = _ListDATA;
+                  String newDATA = json.encode(_AllDATA);
+                  _prefs.setString('DATA', newDATA);
+                  setState(() {});
+                },
+                direction: DismissDirection.endToStart, //只能從右往左滑
+                background: Container(
+                  //樣式設計
+                  child: Padding(
+                    padding: const EdgeInsets.all(30.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: const [
+                        Icon(
+                          Icons.delete,
+                          color: Colors.black45,
                         ),
-                      ),
-                      title: const Text(
-                        '早餐',
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      subtitle: const Text('總額：\$800',
-                          style: TextStyle(fontSize: 12)),
-                      trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: const [
-                            Text('你待付', style: TextStyle(fontSize: 10)),
-                            Text('\$200')
-                          ]),
-                    )
-                  ],
+                        Text(
+                          '刪除',
+                          style: (TextStyle(color: Colors.black45)),
+                          textAlign: TextAlign.right,
+                        ),
+                      ],
+                    ),
+                  ),
+                  color: const Color.fromARGB(255, 249, 179, 93),
                 ),
-              ),
-            )
-          ].toList(),
-        ),
-      ]),
-    );
+                child: Card(
+                    color: Colors.white,
+                    elevation: 6.0,
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15))),
+                    child: SizedBox(
+                      height: 80,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          ListTile(
+                            onTap: () {
+                              Navigator.pushNamed(context, '/spendDetail');
+                            }, //點擊,
+                            leading: Container(
+                              padding: const EdgeInsets.only(right: 15.0),
+                              decoration: const BoxDecoration(
+                                  border: Border(
+                                right: BorderSide(
+                                  // 灰線條
+                                  color: Colors.black12,
+                                  width: 2.0,
+                                ),
+                              )),
+                              child: const CircleAvatar(
+                                backgroundColor: Colors.black26,
+                              ),
+                            ),
+                            title: Text(
+                              element['billName'],
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                            subtitle: Text(
+                                element['totalAmount'] != ""
+                                    ? '\$' + element['totalAmount']
+                                    : '沒有金額',
+                                style: const TextStyle(fontSize: 12)),
+                            trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: const [
+                                  Text('你待付', style: TextStyle(fontSize: 10)),
+                                  Text('\$200')
+                                ]),
+                          )
+                        ],
+                      ),
+                    )));
+          },
+        ));
   }
 }

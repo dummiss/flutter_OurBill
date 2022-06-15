@@ -54,7 +54,6 @@ class _BillAddState extends State<BillAdd> {
     _ALLDATA = await json.decode(_prefs.getString('DATA') ?? '');
     _DATA = _ALLDATA[widget.groupIndex!];
     debugPrint('ADD index:${widget.groupIndex}  DATA: $_DATA');
-    debugPrint('YCC ${_DATA["member"]}');
     for (var name in _DATA['member']) {
       final payerTextField = TextFormField(
         // onSaved: (value) {_DATA[widget.groupIndex]['list']['payer'].add},
@@ -226,7 +225,8 @@ class _BillAddState extends State<BillAdd> {
     var _form = _addFormKey.currentState;
     _form!.save();
     _setData(); // 存資料到SP
-    Navigator.pop(context, true);
+    // Navigator.pop(context, true);
+    (Navigator.popAndPushNamed(context, '/tabs', arguments: widget.groupIndex));
     print("_ALLDATA:$_ALLDATA");
     // print(_groupName);
     // print(_member);
@@ -236,6 +236,7 @@ class _BillAddState extends State<BillAdd> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('新增紀錄'),
       ),
       body: Padding(
@@ -532,6 +533,29 @@ class _BillAddState extends State<BillAdd> {
                               primary: const Color.fromARGB(255, 249, 179, 93),
                               shadowColor:
                                   const Color.fromARGB(200, 249, 179, 93),
+                              shape: const StadiumBorder(), //外觀
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 25, vertical: 10)),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.popAndPushNamed(context, '/tabs',
+                                arguments: widget.groupIndex);
+                          },
+                          child: const Text('取消',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                              )),
+                          style: ElevatedButton.styleFrom(
+                              primary: Colors.black12,
+                              shadowColor: Colors.black38,
                               shape: const StadiumBorder(), //外觀
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 25, vertical: 10)),
