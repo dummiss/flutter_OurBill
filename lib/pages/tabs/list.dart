@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,12 +37,26 @@ class _BillListState extends State<BillList> {
     setState(() {});
   }
 
+  haveToPay(element) {
+    double pay;
+    double count;
+    count = element['sharer'][0] - element['payer'][0];
+    if (count >= 0) {
+      return count.toString();
+    } else {
+      return '0';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.only(
+          left: 20,
+          right: 20,
+        ),
+        //使用套件照日期組數排序
         child: GroupedListView<dynamic, String>(
-          //使用套件照日期組數排序
           elements: _ListDATA,
           groupBy: (element) => element['date'],
           useStickyGroupSeparators: true,
@@ -57,8 +73,8 @@ class _BillListState extends State<BillList> {
             ),
           ),
           indexedItemBuilder: (c, element, index) {
+            //滑動刪除
             return Dismissible(
-                //滑動刪除
                 key: UniqueKey(), //每一個Dismissible都必須有專屬的key，讓Flutter能夠辨識
                 onDismissed: (direction) async {
                   //滑動後要做的事
@@ -90,7 +106,7 @@ class _BillListState extends State<BillList> {
                       ],
                     ),
                   ),
-                  color: const Color.fromARGB(255, 249, 179, 93),
+                  color: Colors.black26,
                 ),
                 child: Card(
                     color: Colors.white,
@@ -133,9 +149,11 @@ class _BillListState extends State<BillList> {
                             trailing: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.end,
-                                children: const [
+                                children: [
                                   Text('你待付', style: TextStyle(fontSize: 10)),
-                                  Text('\$200')
+                                  Text(element['sharer'] != []
+                                      ? '\$' + haveToPay(element)
+                                      : '\$0')
                                 ]),
                           )
                         ],

@@ -16,11 +16,13 @@ class BillAdd extends StatefulWidget {
 
 class _BillAddState extends State<BillAdd> {
   //分帳用
-  TextEditingController _totalPriceController =
+  final TextEditingController _totalPriceController =
       TextEditingController(); //紀錄金額控制器
-  TextEditingController _billNameController = TextEditingController();
-  TextEditingController _noteController = TextEditingController();
-  // TextEditingController _average = TextEditingController();
+  final TextEditingController _billNameController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
+  final TextEditingController _sharerController = TextEditingController();
+  final TextEditingController _payerController = TextEditingController();
+
   bool CheckboxValue = false; //checkbox
 
   var _money = null;
@@ -47,6 +49,8 @@ class _BillAddState extends State<BillAdd> {
 
   final List<Widget> payer = [];
   final List<Widget> sharer = [];
+  List _payerMoney = [];
+  List _sharerMoney = [];
 
   //讀取資料
   Future<void> _loadDATA() async {
@@ -54,9 +58,15 @@ class _BillAddState extends State<BillAdd> {
     _ALLDATA = await json.decode(_prefs.getString('DATA') ?? '');
     _DATA = _ALLDATA[widget.groupIndex!];
     debugPrint('ADD index:${widget.groupIndex}  DATA: $_DATA');
+
     for (var name in _DATA['member']) {
       final payerTextField = TextFormField(
-        // onSaved: (value) {_DATA[widget.groupIndex]['list']['payer'].add},
+        controller: TextEditingController(),
+        onSaved: (value) {
+          value != ""
+              ? _payerMoney.add(double.parse(value!))
+              : _payerMoney.add(0);
+        },
         decoration: InputDecoration(
             hintText: '請輸入金額', // 輸入提示
             prefixIcon: Text(
@@ -71,7 +81,12 @@ class _BillAddState extends State<BillAdd> {
             ),
       );
       final sharerTextField = TextFormField(
-          // onSaved: (value) {_DATA[widget.groupIndex]['list']['payer'].add},
+          controller: TextEditingController(),
+          onSaved: (value) {
+            value != ""
+                ? _sharerMoney.add(double.parse(value!))
+                : _sharerMoney.add(0);
+          },
           decoration: InputDecoration(
               hintText: '請輸入金額', // 輸入提示
               prefixIcon: Text(
@@ -97,7 +112,11 @@ class _BillAddState extends State<BillAdd> {
         final sharerTextField = TextFormField(
             controller: TextEditingController()..text = "$_average",
             enabled: false,
-            // onSaved: (value) {_DATA[widget.groupIndex]['list']['payer'].add},
+            onSaved: (value) {
+              value != ""
+                  ? _sharerMoney.add(double.parse(value!))
+                  : _sharerMoney.add(0);
+            },
             decoration: InputDecoration(
                 // 輸入提示
                 prefixIcon: Text(
@@ -114,7 +133,11 @@ class _BillAddState extends State<BillAdd> {
       } else {
         final sharerTextField1 = TextFormField(
             controller: TextEditingController(),
-            // onSaved: (value) {_DATA[widget.groupIndex]['list']['payer'].add},
+            onSaved: (value) {
+              value != ""
+                  ? _sharerMoney.add(double.parse(value!))
+                  : _sharerMoney.add(0);
+            },
             decoration: InputDecoration(
                 hintText: '請輸入金額', // 輸入提示
                 prefixIcon: Text(
@@ -195,18 +218,8 @@ class _BillAddState extends State<BillAdd> {
       "totalAmount": _money,
       "category": _categoryValue,
       "note": _noteValue,
-      "payer": [
-        {"syuan": 800},
-        {"蘋果": 0},
-        {"草莓": 0},
-        {"牛奶": 0},
-      ],
-      "sharer": [
-        {"syuan": 200},
-        {"蘋果": 200},
-        {"草莓": 200},
-        {"牛奶": 200},
-      ]
+      "payer": _payerMoney,
+      "sharer": _sharerMoney,
     });
     print('\n');
     print("_DATA['list'] :${_DATA['list']}");
