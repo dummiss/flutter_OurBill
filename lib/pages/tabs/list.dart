@@ -120,7 +120,8 @@ class _BillListState extends State<BillList> {
                         children: <Widget>[
                           ListTile(
                             onTap: () {
-                              Navigator.pushNamed(context, '/spendDetail');
+                              Navigator.pushNamed(context, '/spendDetail',
+                                  arguments: element[index]);
                             }, //點擊,
                             leading: Container(
                               padding: const EdgeInsets.only(right: 15.0),
