@@ -40,11 +40,7 @@ class _BillListState extends State<BillList> {
   haveToPay(element) {
     double? count;
     count = element['sharer'][0] - element['payer'][0];
-    if (count! >= 0.0) {
-      return count.toString();
-    } else {
-      return '0';
-    }
+    return count;
   }
 
   @override
@@ -121,7 +117,11 @@ class _BillListState extends State<BillList> {
                             onTap: () {
                               //到消費細節頁
                               Navigator.pushNamed(context, '/spendDetail',
-                                  arguments: {'member':_AllDATA[widget.index]['member'],'detail': element, 'index': index});
+                                  arguments: {
+                                    'member': _AllDATA[widget.index]['member'],
+                                    'detail': element,
+                                    'index': index
+                                  });
                               print('element${element}');
                               print('index:$index');
                             }, //點擊,
@@ -153,10 +153,17 @@ class _BillListState extends State<BillList> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  const Text('你待付',
-                                      style: TextStyle(fontSize: 10)),
-                                  Text(element['sharer'] != [] && element['totalAmount']!=''
-                                      ? '\$' + haveToPay(element)
+                                  haveToPay(element) >= 0
+                                      ? const Text('你待付',
+                                          style: TextStyle(
+                                              color: Colors.red, fontSize: 10))
+                                      : const Text('你代墊',
+                                          style: TextStyle(
+                                              color: Colors.blue,
+                                              fontSize: 10)),
+                                  Text(element['sharer'] != [] &&
+                                          element['totalAmount'] != ''
+                                      ? '\$' + haveToPay(element).abs().toString() //先轉絕對值，去除負數符號
                                       : '\$0')
                                 ]),
                           )
