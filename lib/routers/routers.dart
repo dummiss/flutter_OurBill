@@ -27,7 +27,7 @@ final Map<String, Function> routes = {
   '/groupAdd': (context, {arguments}) => const GroupAdd(),
   '/tabs': (context, {arguments}) => Tabs(groupIndex: arguments),
   '/add': (context, {arguments}) => BillAdd(groupIndex: arguments),
-  '/spendDetail': (context, {arguments}) => SpendDetail(),
+  '/spendDetail': (context, {arguments}) => SpendDetail(arguments:arguments),
   '/addPayerEdit': (context, {arguments}) => const AddPayerEdit(),
   '/addSharerEdit': (context, {arguments}) => const AddSharerEdit(),
   //

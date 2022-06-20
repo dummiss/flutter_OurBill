@@ -33,15 +33,14 @@ class _BillListState extends State<BillList> {
     _AllDATA = json.decode(_prefs.getString('DATA') ?? '');
     _ListDATA =
         json.decode(_prefs.getString('DATA') ?? '')[widget.index]['list'];
-    print("_DATA:$_ListDATA");
+    print("_ListDATA:$_ListDATA");
     setState(() {});
   }
 
   haveToPay(element) {
-    double pay;
-    double count;
+    double? count;
     count = element['sharer'][0] - element['payer'][0];
-    if (count >= 0) {
+    if (count! >= 0.0) {
       return count.toString();
     } else {
       return '0';
@@ -120,8 +119,11 @@ class _BillListState extends State<BillList> {
                         children: <Widget>[
                           ListTile(
                             onTap: () {
+                              //到消費細節頁
                               Navigator.pushNamed(context, '/spendDetail',
-                                  arguments: element[index]);
+                                  arguments: {'member':_AllDATA[widget.index]['member'],'detail': element, 'index': index});
+                              print('element${element}');
+                              print('index:$index');
                             }, //點擊,
                             leading: Container(
                               padding: const EdgeInsets.only(right: 15.0),
@@ -151,8 +153,9 @@ class _BillListState extends State<BillList> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Text('你待付', style: TextStyle(fontSize: 10)),
-                                  Text(element['sharer'] != []
+                                  const Text('你待付',
+                                      style: TextStyle(fontSize: 10)),
+                                  Text(element['sharer'] != [] && element['totalAmount']!=''
                                       ? '\$' + haveToPay(element)
                                       : '\$0')
                                 ]),

@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 
 class SpendDetail extends StatefulWidget {
-  int? data;
-  SpendDetail({Key? key}) : super(key: key);
+  final arguments;
+  SpendDetail({Key? key, this.arguments}) : super(key: key);
 
   @override
   State<SpendDetail> createState() => _SpendDetailState();
 }
 
 class _SpendDetailState extends State<SpendDetail> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print(
+        'widget.arguments:${widget.arguments != null ? widget.arguments['detail'] : 'no detail'}');
+    print('member:${widget.arguments['member']}');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,12 +33,12 @@ class _SpendDetailState extends State<SpendDetail> {
                   child: ListView(children: [
                 TextFormField(
                   enabled: false,
-                  controller: TextEditingController()..text = "money",
+                  controller: TextEditingController()
+                    ..text = '${widget.arguments['detail']['totalAmount']}',
                   textAlign: TextAlign.end,
                   style: const TextStyle(
                       fontSize: 30, fontWeight: FontWeight.w700),
                   decoration: const InputDecoration(
-                      hintText: '點擊以編輯', // 輸入提示
                       hintStyle: TextStyle(
                           color: Colors.black26,
                           fontSize: 15,
@@ -49,14 +58,15 @@ class _SpendDetailState extends State<SpendDetail> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text('2020-2-20'),
-                    Text('11:20 pm'),
+                    Text('${widget.arguments['detail']['date']}'),
+                    Text('${widget.arguments['detail']['time']}'),
                   ],
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
                   enabled: false,
-                  controller: TextEditingController()..text = "billname",
+                  controller: TextEditingController()
+                    ..text = "${widget.arguments['detail']['billName']}",
                   decoration: const InputDecoration(
                       prefixIcon: Text(
                         '名稱', //輸入框前綴文字
@@ -71,7 +81,8 @@ class _SpendDetailState extends State<SpendDetail> {
                 ),
                 TextFormField(
                   enabled: false,
-                  controller: TextEditingController()..text = "category",
+                  controller: TextEditingController()
+                    ..text = widget.arguments['detail']['category']=='null'? '沒有選擇':widget.arguments['detail']['category'],
                   decoration: const InputDecoration(
                       prefixIcon: Text(
                         '類別', //輸入框前綴文字
@@ -86,7 +97,8 @@ class _SpendDetailState extends State<SpendDetail> {
                 ),
                 TextFormField(
                   enabled: false,
-                  controller: TextEditingController()..text = "note",
+                  controller: TextEditingController()
+                    ..text = widget.arguments['detail']['note'],
                   decoration: const InputDecoration(
                       prefixIcon: Text(
                         '備註', //輸入框前綴文字
@@ -131,17 +143,41 @@ class _SpendDetailState extends State<SpendDetail> {
                                       child: Text(
                                         '付款人',
                                         style: TextStyle(
-                                          fontSize: 15,
+                                          fontSize: 18,
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
                                     ),
                                     Expanded(
-                                      flex: 5,
+                                      flex: 2,
                                       child: Column(
-                                          // children: payer,
-                                          ),
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children:
+                                            widget.arguments['member'] != null
+                                                ? (widget.arguments['member']
+                                                        as List) //強制轉型
+                                                    .map((item) => Text(item,style: const TextStyle(fontSize: 16,height:1.6),))
+                                                    .toList()
+                                                : [],
+                                        // children: payer,
+                                      ),
                                     ),
+                                    Expanded(
+                                        flex: 2,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: widget.arguments['detail']
+                                                      ['payer'] !=
+                                                  null
+                                              ? (widget.arguments['detail']
+                                                      ['payer'] as List) //強制轉型
+                                                  .map((item) =>
+                                                      Text(item.toString(),style: const TextStyle(fontSize: 16, height:1.6),))
+                                                  .toList()
+                                              : [],
+                                        ))
                                   ]),
                             ],
                           )),
@@ -158,16 +194,41 @@ class _SpendDetailState extends State<SpendDetail> {
                                       child: Text(
                                         '分帳人',
                                         style: TextStyle(
-                                          fontSize: 15,
+                                          fontSize: 18,
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
                                     ),
                                     Expanded(
-                                        flex: 5,
+                                      flex: 2,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children:
+                                            widget.arguments['member'] != null
+                                                ? (widget.arguments['member']
+                                                        as List) //強制轉型
+                                                    .map((item) => Text(item,style: const TextStyle(fontSize: 16,height:1.6)))
+                                                    .toList()
+                                                : [],
+                                        // children: payer,
+                                      ),
+                                    ),
+                                    Expanded(
+                                        flex: 2,
                                         child: Column(
-                                            // children: sharer,
-                                            ))
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: widget.arguments['detail']
+                                                      ['sharer'] !=
+                                                  null
+                                              ? (widget.arguments['detail']
+                                                      ['sharer'] as List) //強制轉型
+                                                  .map((item) =>
+                                                      Text(item.toString(),style: const TextStyle(fontSize: 16, height:1.6),))
+                                                  .toList()
+                                              : [],
+                                        ))
                                   ]),
                             ],
                           )),
