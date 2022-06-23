@@ -7,24 +7,24 @@ import '../pages/tabs/list.dart';
 
 //帳單清單頁面
 class Tabs extends StatefulWidget {
-  int? groupIndex; //接收groupList傳過來的arguments:index參數
-  Tabs({Key? key, this.groupIndex}) : super(key: key);
+  int? arguments; //接收groupList傳過來的arguments:index參數
+  Tabs({Key? key, this.arguments}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _TabsState(groupIndex!);
+  State<StatefulWidget> createState() => _TabsState(arguments!);
 }
 
 class _TabsState extends State<Tabs> {
-  int groupIndex;
+  int arguments;
 
   var _pages = <Widget>[];
 
   //底部導覽切換的頁面
-  _TabsState(this.groupIndex) {
+  _TabsState(this.arguments) {
     _pages = <Widget>[
-      BillDebt(),
+      BillDebt(arguments),
       BillAdd(), //不跳轉
-      BillList(groupIndex),
+      BillList(arguments),
     ];
   }
 
@@ -56,9 +56,9 @@ class _TabsState extends State<Tabs> {
     //問ari 要怎麼藉由這種方式讓建立玩可以重新刷新，這次先把回上一頁取消，直接傳路由的方式刷新
     index == 1
         ? (Navigator.pushReplacementNamed(context, '/add',
-            arguments: groupIndex)) //直接刪除「前1個」 route，push到新 route，stack就不會有這層
+            arguments: arguments)) //直接刪除「前1個」 route，push到新 route，stack就不會有這層
         : setState(() {
-            print('tabs index:$groupIndex'); //test
+            print('tabs index:$arguments'); //test
             _selectedIndex = index;
             tabsTitle = _titles[index];
           });
@@ -100,7 +100,7 @@ class _TabsState extends State<Tabs> {
             focusColor: const Color.fromARGB(255, 242, 187, 119),
             onPressed: () {
               Navigator.pushReplacementNamed(context, '/add',
-                  arguments: groupIndex);
+                  arguments: arguments);
             },
           )),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

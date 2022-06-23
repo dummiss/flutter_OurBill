@@ -10,7 +10,7 @@ class Home extends StatelessWidget {
     return Scaffold(
       body: SplashScreenView(
         navigateRoute: const GroupList(),
-        duration: 4000,
+        duration: 3000,
         imageSize: 200,
         imageSrc: "images/logo.png",
         text: "Our Bill",

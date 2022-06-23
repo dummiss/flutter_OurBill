@@ -10,15 +10,15 @@ import 'package:flutter_ourbill/data/json.dart';
 import 'data/json.dart'; //假資料
 
 class BillList extends StatefulWidget {
-  int index;
-  BillList(this.index, {Key? key}) : super(key: key);
+  int arguments;
+  BillList(this.arguments, {Key? key}) : super(key: key);
 
   @override
   State<BillList> createState() => _BillListState();
 }
 
 class _BillListState extends State<BillList> {
-  List<dynamic> _AllDATA = [];
+  List<dynamic> _GroupDATA = [];
   List<dynamic> _ListDATA = [];
 
 //  初始化：先從SP讀取資料
@@ -30,9 +30,9 @@ class _BillListState extends State<BillList> {
 
   _loadDATA() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _AllDATA = json.decode(_prefs.getString('DATA') ?? '');
+    _GroupDATA = json.decode(_prefs.getString('DATA') ?? '');
     _ListDATA =
-        json.decode(_prefs.getString('DATA') ?? '')[widget.index]['list'];
+        json.decode(_prefs.getString('DATA') ?? '')[widget.arguments]['list'];
     print("_ListDATA:$_ListDATA");
     setState(() {});
   }
@@ -76,8 +76,8 @@ class _BillListState extends State<BillList> {
                   SharedPreferences _prefs =
                       await SharedPreferences.getInstance(); //更新SP
                   _ListDATA.removeAt(index);
-                  _AllDATA[widget.index]['list'] = _ListDATA;
-                  String newDATA = json.encode(_AllDATA);
+                  _GroupDATA[widget.arguments]['list'] = _ListDATA;
+                  String newDATA = json.encode(_GroupDATA);
                   _prefs.setString('DATA', newDATA);
                   setState(() {});
                 },
@@ -118,7 +118,7 @@ class _BillListState extends State<BillList> {
                               //到消費細節頁
                               Navigator.pushNamed(context, '/spendDetail',
                                   arguments: {
-                                    'member': _AllDATA[widget.index]['member'],
+                                    'member': _GroupDATA[widget.arguments]['member'],
                                     'detail': element,
                                     'index': index
                                   });

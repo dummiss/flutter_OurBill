@@ -63,7 +63,7 @@ packages:
       name: cupertino_icons
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   date_format:
     dependency: "direct main"
     description:
@@ -84,7 +84,7 @@ packages:
       name: ffi
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   file:
     dependency: transitive
     description:
@@ -120,7 +120,7 @@ packages:
       name: grouped_list
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.1.1"
+    version: "5.1.2"
   image:
     dependency: transitive
     description:

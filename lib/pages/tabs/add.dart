@@ -7,9 +7,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BillAdd extends StatefulWidget {
-  final int? groupIndex; //接收tab傳過來的arguments:index參數
+  final int? arguments; //接收tab傳過來的arguments:index參數
 
-  const BillAdd({Key? key, this.groupIndex}) : super(key: key);
+  const BillAdd({Key? key, this.arguments}) : super(key: key);
   @override
   State<BillAdd> createState() => _BillAddState();
 }
@@ -56,8 +56,8 @@ class _BillAddState extends State<BillAdd> {
   Future<void> _loadDATA() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     _ALLDATA = await json.decode(_prefs.getString('DATA') ?? '');
-    _DATA = _ALLDATA[widget.groupIndex!];
-    debugPrint('ADD index:${widget.groupIndex}  DATA: $_DATA');
+    _DATA = _ALLDATA[widget.arguments!];
+    debugPrint('ADD index:${widget.arguments}  DATA: $_DATA');
 
     for (var name in _DATA['member']) {
       final payerTextField = TextFormField(
@@ -223,7 +223,7 @@ class _BillAddState extends State<BillAdd> {
     });
     print('\n');
     print("_DATA['list'] :${_DATA['list']}");
-    _ALLDATA[widget.groupIndex!] = _DATA;
+    _ALLDATA[widget.arguments!] = _DATA;
     String jsonGroupDATA = json.encode(_ALLDATA); //轉json
     print('\n');
     print("_DATA:$_DATA");
@@ -239,7 +239,7 @@ class _BillAddState extends State<BillAdd> {
     _form!.save();
     _setData(); // 存資料到SP
     // Navigator.pop(context, true);
-    (Navigator.popAndPushNamed(context, '/tabs', arguments: widget.groupIndex));
+    (Navigator.popAndPushNamed(context, '/tabs', arguments: widget.arguments));
     print("_ALLDATA:$_ALLDATA");
     // print(_groupName);
     // print(_member);
@@ -558,7 +558,7 @@ class _BillAddState extends State<BillAdd> {
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.popAndPushNamed(context, '/tabs',
-                                arguments: widget.groupIndex);
+                                arguments: widget.arguments);
                           },
                           child: const Text('取消',
                               style: TextStyle(

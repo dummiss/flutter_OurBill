@@ -1,131 +1,131 @@
-List appData = [
-  //範例
-  {
-    "group": "宜蘭行",
-    "owner": "syuan",
-    "member": [
-      "syuan",
-      "蘋果",
-      "草莓",
-      "牛奶",
-    ],
-    "list": [
-      //map時先判斷type類型來決定返回什麼組件(用三元法)
-      {
-        "type": "bill",
-        "date": "2022-05-26",
-        "time": "下午01:50",
-        "billName": "美而美早餐",
-        "totalAmount": 800,
-        "category": "餐飲",
-        "note": "無",
-        "payer": [
-          {"syuan": 800},
-          {"蘋果": 0},
-          {"草莓": 0},
-          {"牛奶": 0},
-        ],
-        "sharer": [
-          {"syuan": 200},
-          {"蘋果": 200},
-          {"草莓": 200},
-          {"牛奶": 200},
-        ]
-      },
-      {
-        "type": "transfer",
-        "date": "2022-05-26",
-        "time": "下午3:50",
-        "amount": 200,
-        "beneficiary": "syuan", //收款人
-        "remitter": "蘋果", //匯款人
-        "note": "已付清囉!",
-      }
-    ]
-  },
-  {
-    "group": "台北行",
-    "owner": "syuan",
-    "member": [
-      "syuan",
-      "草莓",
-      "牛奶",
-    ],
-    "list": [
-      //map時先判斷type類型來決定返回什麼組件(用三元法)
-      {
-        "type": "bill",
-        "date": "2022-05-26",
-        "time": "下午01:50",
-        "billName": "美而美早餐",
-        "totalAmount": 800,
-        "category": "餐飲",
-        "note": "無",
-        "payer": [
-          {"syuan": 800},
-          {"蘋果": 0},
-          {"草莓": 0},
-          {"牛奶": 0},
-        ],
-        "sharer": [
-          {"syuan": 200},
-          {"蘋果": 200},
-          {"草莓": 200},
-          {"牛奶": 200},
-        ]
-      },
-      {
-        "type": "transfer",
-        "date": "2022-05-26",
-        "time": "下午3:50",
-        "amount": 200,
-        "beneficiary": "syuan", //收款人
-        "remitter": "蘋果", //匯款人
-        "note": "已付清囉!",
-      }
-    ]
-  },
-];
+// List appData = [
+//   //範例
+//   {
+//     "group": "宜蘭行",
+//     "owner": "syuan",
+//     "member": [
+//       "syuan",
+//       "蘋果",
+//       "草莓",
+//       "牛奶",
+//     ],
+//     "list": [
+//       //map時先判斷type類型來決定返回什麼組件(用三元法)
+//       {
+//         "type": "bill",
+//         "date": "2022-05-26",
+//         "time": "下午01:50",
+//         "billName": "美而美早餐",
+//         "totalAmount": 800,
+//         "category": "餐飲",
+//         "note": "無",
+//         "payer": [
+//           {"syuan": 800},
+//           {"蘋果": 0},
+//           {"草莓": 0},
+//           {"牛奶": 0},
+//         ],
+//         "sharer": [
+//           {"syuan": 200},
+//           {"蘋果": 200},
+//           {"草莓": 200},
+//           {"牛奶": 200},
+//         ]
+//       },
+//       {
+//         "type": "transfer",
+//         "date": "2022-05-26",
+//         "time": "下午3:50",
+//         "amount": 200,
+//         "beneficiary": "syuan", //收款人
+//         "remitter": "蘋果", //匯款人
+//         "note": "已付清囉!",
+//       }
+//     ]
+//   },
+//   {
+//     "group": "台北行",
+//     "owner": "syuan",
+//     "member": [
+//       "syuan",
+//       "草莓",
+//       "牛奶",
+//     ],
+//     "list": [
+//       //map時先判斷type類型來決定返回什麼組件(用三元法)
+//       {
+//         "type": "bill",
+//         "date": "2022-05-26",
+//         "time": "下午01:50",
+//         "billName": "美而美早餐",
+//         "totalAmount": 800,
+//         "category": "餐飲",
+//         "note": "無",
+//         "payer": [
+//           {"syuan": 800},
+//           {"蘋果": 0},
+//           {"草莓": 0},
+//           {"牛奶": 0},
+//         ],
+//         "sharer": [
+//           {"syuan": 200},
+//           {"蘋果": 200},
+//           {"草莓": 200},
+//           {"牛奶": 200},
+//         ]
+//       },
+//       {
+//         "type": "transfer",
+//         "date": "2022-05-26",
+//         "time": "下午3:50",
+//         "amount": 200,
+//         "beneficiary": "syuan", //收款人
+//         "remitter": "蘋果", //匯款人
+//         "note": "已付清囉!",
+//       }
+//     ]
+//   },
+// ];
 
-List a = [
-  {
-    'group': '宜蘭行',
-    'owner': 'syuan',
-    'member': ['apple', 'milk', 'orange'],
-  },
-  {
-    'group': '台北行',
-    'owner': '宣萱',
-    'member': ['apple', 'milk', 'orange'],
-  },
-];
+// List a = [
+//   {
+//     'group': '宜蘭行',
+//     'owner': 'syuan',
+//     'member': ['apple', 'milk', 'orange'],
+//   },
+//   {
+//     'group': '台北行',
+//     'owner': '宣萱',
+//     'member': ['apple', 'milk', 'orange'],
+//   },
+// ];
 
-List DataList = [
-  {
-    //0
-    {'date': '2022/5/30'},
-    [
-      {'title': '晚餐', 'totalmoney': '800', 'pay': '200'},
-      {'title': '早餐', 'totalmoney': '600', 'pay': '100'}
-    ]
-  },
-  {
-    //1
-    {'date': '2022/5/25'},
-    [
-      {'title': '晚餐', 'totalmoney': '800', 'pay': '200'}
-    ]
-  },
-  {
-    //2
-    {'date': '2022/5/20'},
-    [
-      {'title': '晚餐', 'totalmoney': '800', 'pay': '200'},
-      {'title': '晚餐', 'totalmoney': '800', 'pay': '200'},
-      {'title': '晚餐', 'totalmoney': '800', 'pay': '200'}
-    ]
-  },
-];
+// List DataList = [
+//   {
+//     //0
+//     {'date': '2022/5/30'},
+//     [
+//       {'title': '晚餐', 'totalmoney': '800', 'pay': '200'},
+//       {'title': '早餐', 'totalmoney': '600', 'pay': '100'}
+//     ]
+//   },
+//   {
+//     //1
+//     {'date': '2022/5/25'},
+//     [
+//       {'title': '晚餐', 'totalmoney': '800', 'pay': '200'}
+//     ]
+//   },
+//   {
+//     //2
+//     {'date': '2022/5/20'},
+//     [
+//       {'title': '晚餐', 'totalmoney': '800', 'pay': '200'},
+//       {'title': '晚餐', 'totalmoney': '800', 'pay': '200'},
+//       {'title': '晚餐', 'totalmoney': '800', 'pay': '200'}
+//     ]
+//   },
+// ];
 
 /*
  {
@@ -286,3 +286,62 @@ class _TabsState extends State<Tabs> {
 
 
 */
+
+
+
+// void main() {
+//   List<Map> data = [
+//     {
+//       'member':['小花','小徐','小明','小水'],
+//       'list': [
+//         {
+//           'payer': [3000, 2600, 0, 0],
+//           'sharer': [1400, 1400, 1400, 1400]
+//         },
+//         {
+//           'payer': [0, 3480, 0, 0],
+//           'sharer': [500, 400, 1290, 1290]
+//         },
+//         {
+//           'payer': [0, 500, 0, 0],
+//           'sharer': [125, 125, 125, 125]
+//         },
+//         {
+//           'payer': [1800, 0, 0, 0],
+//           'sharer': [900, 900, 0, 0]
+//         }
+//       ]
+//     }
+//   ];
+//
+//   //計算出已付款及代付款的總額
+//   List payerTotal = [];
+//   List sharerTotal = [];
+//   data[0]['list'].map((v) {
+//     List tmp1 = payerTotal;
+//     List tmp2 = sharerTotal;
+//     for (int i = 0; i < v['payer'].length; i++) {
+//       if (tmp1.length <= 3) {
+//         payerTotal.add(v['payer'][i]);
+//         sharerTotal.add(v['sharer'][i]);
+//       } else {
+//         payerTotal[i] = tmp1[i] + v['payer'][i];
+//         sharerTotal[i] = tmp2[i] + v['sharer'][i];
+//       }
+//     }
+//   }).toList();
+//   print('payerTotal:$payerTotal');
+//   print('sharerTotal:$sharerTotal');
+//
+//   //最後每人負債總額
+//   List finalCount = [];
+//   for (int i = 0; i < data[0]['member'].length; i++) {
+//     int count = payerTotal[i] - sharerTotal[i];
+//     finalCount.add({data[0]['member'][i]: count});
+//   }
+//
+//   print('finalCount:$finalCount');
+//
+// }
+
+//進行進行
