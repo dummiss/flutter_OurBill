@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BillDebt extends StatefulWidget {
@@ -13,7 +14,7 @@ class BillDebt extends StatefulWidget {
 class _BillDebtState extends State<BillDebt> {
   Map _groupDATA = {};
   List<dynamic> _allDATA = [];
-  List _finalCount = [];
+  List _finalCount0 = [{}];
   List<Widget> _finalCountList = [];
 
   @override
@@ -32,7 +33,7 @@ class _BillDebtState extends State<BillDebt> {
   }
 
   _countdebt(_GroupDATA) {
-    //計算出已付款及代付款的總額
+    //計算出已付款及待付款的總額
     List<dynamic> payerTotal = [];
     List<dynamic> sharerTotal = [];
     _GroupDATA['list'].map((v) {
@@ -51,45 +52,99 @@ class _BillDebtState extends State<BillDebt> {
     print('payerTotal:$payerTotal');
     print('sharerTotal:$sharerTotal');
 
-    //最後每人負債總額
+    //已付款-待付款＝最後每人負債總額
     for (int i = 0; i < _GroupDATA['member'].length; i++) {
       double count = payerTotal[i] - sharerTotal[i];
       if (i == 0) {
-        _finalCount.add({_GroupDATA['member'][i] + '(我)': count});
+        _finalCount0[0]
+            .putIfAbsent(_GroupDATA['member'][i] + '(我)', () => count);
       } else {
-        _finalCount.add({_GroupDATA['member'][i]: count});
+        _finalCount0[0].putIfAbsent(_GroupDATA['member'][i], () => count);
       }
     }
-    print('finalCount:$_finalCount');
+    print('finalCount:$_finalCount0');
 
-    for (int i = 0; i < _finalCount.length; i++) {
-      _finalCount[i].forEach((key, value) {
-        _finalCountList.add(Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text(key), Text(value.toString())],
-        ));
-        _finalCountList.add(const Divider(
-          thickness: 1,
-        ));
+    //結餘widget list
+    _finalCount0[0].forEach((key, value) {
+      _finalCountList.add(Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [Text(key), Text(value.toString())],
+      ));
+      _finalCountList.add(const Divider(
+        thickness: 1,
+      ));
+    });
+
+    //分帳
+    var _finalCount = _finalCount0; //複製一份、避免跟上面衝突
+    var bigCreditor; //最大債主
+    var bigDebtor; //最大負債人
+    var debt = 0; //紀錄比較債務金額
+    var splitDebt = {}; //紀錄最終分帳方式
+
+    checkDebt() {
+      num a = 0;
+      _finalCount[0].forEach((key, value) {
+        a += value.abs();
       });
-
-      // _finalCount[i].map((key, value) {
-      //   a.add(Row(
-      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //     children: [Text(key), Text(value)],
-      //   ));
-      //   a.add(
-      //     const Divider(
-      //       thickness: 1,
-      //     ),
-      //   );
-      // });
+      print('絕對值總和:$a');
+      return a;
     }
 
-    print('_finalCountWidget:$_finalCountList');
+    while (checkDebt() > 0) {
+      //找出最大的債主與負債人
+      _finalCount[0].forEach((key, value) {
+        if (value > debt) {
+          bigCreditor = key;
+        } else if (value < debt) {
+          bigDebtor = key;
+        }
+        print('bigCreditor：$bigCreditor 、bigDebtor：$bigDebtor');
+      });
+
+      //找出最大債主與負債人中金額最小者
+      var debtAmount = min(_finalCount[0][bigCreditor] as num,
+          -(_finalCount[0][bigDebtor]) as num);
+
+      print(debtAmount);
+
+      //最大債主向最大負債人收款，記錄到debt物件
+      if (splitDebt.containsKey(bigCreditor)) {
+        splitDebt[bigCreditor][bigDebtor] = debtAmount;
+      } else {
+        splitDebt[bigCreditor] = {};
+        splitDebt[bigCreditor][bigDebtor] =
+            debtAmount; //若尚未在splitDebt建立該人相關帳務，需定義第二層的物件，記錄對另一人的債務收付
+      }
+
+      //最大債務人向最大債主付款，記錄到splitDebt
+      if (splitDebt.containsKey(bigDebtor)) {
+        splitDebt[bigDebtor][bigCreditor] = -debtAmount;
+      } else {
+        splitDebt[bigDebtor] = {};
+        splitDebt[bigDebtor][bigCreditor] =
+            -debtAmount; //若尚未在splitDebt內建立該人相關帳務，需定義第二層的物件，記錄對另一人的債務收付
+      }
+      //收付款後，更新餘額
+      _finalCount[0][bigCreditor] -= debtAmount;
+      _finalCount[0][bigDebtor] += debtAmount;
+      print(splitDebt);
+    }
+
+
+    //結餘widget list
+    splitDebt.forEach((key, value) {
+      _finalCountList.add(Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [Text(key), Text(value.toString())],
+      ));
+      _finalCountList.add(const Divider(
+        thickness: 1,
+      ));
+    });
   }
 
-  _finalCountWidget() {}
+
 
   @override
   Widget build(BuildContext context) {
