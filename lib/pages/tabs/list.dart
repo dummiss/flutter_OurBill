@@ -145,8 +145,8 @@ class _BillListState extends State<BillList> {
                                   const TextStyle(fontWeight: FontWeight.w500),
                             ),
                             subtitle: Text(
-                                element['totalAmount'] != ""
-                                    ? '\$' + element['totalAmount']
+                                element['totalAmount'] != null
+                                    ? '\$' + element['totalAmount'].toString()
                                     : '沒有金額',
                                 style: const TextStyle(fontSize: 12)),
                             trailing: Column(

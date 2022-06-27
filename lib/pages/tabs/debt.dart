@@ -16,7 +16,8 @@ class _BillDebtState extends State<BillDebt> {
   List<dynamic> _allDATA = [];
   List _finalCount0 = [{}];
   List<Widget> _finalCountList = [];
-
+  List<Widget> _ListTileWidget = [];
+  bool isInit = false;
   @override
   void initState() {
     super.initState();
@@ -29,7 +30,9 @@ class _BillDebtState extends State<BillDebt> {
     _groupDATA = json.decode(_prefs.getString('DATA') ?? '')[widget.arguments];
     print("_GroupDATA:$_groupDATA");
     _countdebt(_groupDATA);
-    setState(() {});
+    setState(() {
+      isInit = true;
+    });
   }
 
   _countdebt(_GroupDATA) {
@@ -40,7 +43,7 @@ class _BillDebtState extends State<BillDebt> {
       List tmp1 = payerTotal;
       List tmp2 = sharerTotal;
       for (int i = 0; i < v['payer'].length; i++) {
-        if (tmp1.length <= 3) {
+        if (tmp1.length <= v['payer'].length-1) {
           payerTotal.add(v['payer'][i]);
           sharerTotal.add(v['sharer'][i]);
         } else {
@@ -80,7 +83,7 @@ class _BillDebtState extends State<BillDebt> {
     var bigCreditor; //最大債主
     var bigDebtor; //最大負債人
     var debt = 0; //紀錄比較債務金額
-    var splitDebt = {}; //紀錄最終分帳方式
+    var splitDebt = <String, dynamic>{}; //紀錄最終分帳方式
 
     checkDebt() {
       num a = 0;
@@ -131,93 +134,111 @@ class _BillDebtState extends State<BillDebt> {
       print(splitDebt);
     }
 
+    // 債務關係widget list
 
-    //結餘widget list
+    // <String, Map<String, double>>
+    // <String, ListTile>
+    //測試中
+    // textWidgets = splitDebt
+    //     .map(
+    //       (key, value) {
+    //         final subMap = value as Map<String, double>;
+    //         var a;
+    //         String str = '';
+    //         subMap.forEach((key, value) {
+    //           str += '$key: $value';
+    //         });
+    //         final t = Text('Leading Key: $Key, SubMap: $str');
+    //         return MapEntry(key, t);
+    //       },
+    //     )
+    //     .values
+    //     .toList();
+
     splitDebt.forEach((key, value) {
-      _finalCountList.add(Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text(key), Text(value.toString())],
-      ));
-      _finalCountList.add(const Divider(
-        thickness: 1,
-      ));
+      value.forEach((key2, value2) {
+        if(value2>0){
+         _ListTileWidget.add(ListTile(
+            leading: Container(width: 60, child: Center(child: Text(key2))),
+            title: Column(
+              children: [
+                const Text(
+                  '須支付',
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                ),
+                Container(
+                    width: 150,
+                    child: Image.asset('images/debtArrow.png',
+                        fit: BoxFit.fitWidth)),
+                Text(
+                  value2.abs().toString(),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                )
+              ],
+            ),
+            trailing: Container(
+                width: 80,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [Text(key), Icon(Icons.keyboard_arrow_right)],
+                )),
+          ));
+        }
+
+      });
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(30.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '結餘',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Column(
-            children: _finalCountList,
-          ),
-
-          Padding(
-            padding: EdgeInsets.only(top: 30, bottom: 10),
-            child: Text(
-              '債務關係',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-            ),
-          ),
-          //白色區塊
-          Container(
-              // margin: const EdgeInsets.only(top: 50, left: 10, right: 10),
-              decoration: const BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black38,
-                      blurRadius: 5,
-                      offset: Offset(0, 3)), //偏移
-                ],
-                color: Colors.white,
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.all(Radius.circular(15)),
-              ),
-              child: Column(children: [
-                ListTile(
-                  leading:
-                      Container(width: 60, child: Center(child: Text('syuan'))),
-                  title: Column(
-                    children: [
-                      Text(
-                        '須支付',
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
-                      ),
-                      Container(
-                          width: 200,
-                          child: Image.asset('images/debtArrow.png',
-                              fit: BoxFit.fitWidth)),
-                      Text(
-                        '\$900',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      )
-                    ],
+    return isInit
+        ? Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '結餘',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
-                  trailing: Container(
-                      width: 60,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text('milk'),
-                          Icon(Icons.keyboard_arrow_right)
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Column(
+                    children: _finalCountList,
+                  ),
+
+                  Padding(
+                    padding: EdgeInsets.only(top: 30, bottom: 10),
+                    child: Text(
+                      '債務關係',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  //白色區塊
+                  Container(
+                      // margin: const EdgeInsets.only(top: 50, left: 10, right: 10),
+                    padding: EdgeInsets.only(top:15,bottom: 15),
+                      decoration: const BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black38,
+                              blurRadius: 5,
+                              offset: Offset(0, 3)), //偏移
                         ],
-                      )),
-                )
-              ]))
-        ],
-      ),
-    );
+                        color: Colors.white,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                      ),
+                      child: Column(
+                        children: _ListTileWidget,
+                      ))
+                ],
+              ),
+            ),
+          )
+        : const SizedBox.shrink();
   }
 }
