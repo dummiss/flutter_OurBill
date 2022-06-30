@@ -1,16 +1,13 @@
-import 'dart:ffi';
-
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:grouped_list/grouped_list.dart';
 import "package:collection/collection.dart"; //引入groupby fn
 
-import 'package:flutter_ourbill/data/json.dart';
-import 'data/json.dart'; //假資料
 
 class BillList extends StatefulWidget {
-  int arguments;
+  int arguments; //index
   BillList(this.arguments, {Key? key}) : super(key: key);
 
   @override
@@ -38,7 +35,7 @@ class _BillListState extends State<BillList> {
   }
 
   haveToPay(element) {
-    double? count;
+    num? count;
     count = element['sharer'][0] - element['payer'][0];
     return count;
   }
@@ -67,7 +64,7 @@ class _BillListState extends State<BillList> {
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
-          indexedItemBuilder: (c, element, index) {
+          indexedItemBuilder: (context, element, index) {
             //滑動刪除
             return Dismissible(
                 key: UniqueKey(), //每一個Dismissible都必須有專屬的key，讓Flutter能夠辨識
@@ -75,7 +72,7 @@ class _BillListState extends State<BillList> {
                   //滑動後要做的事
                   SharedPreferences _prefs =
                       await SharedPreferences.getInstance(); //更新SP
-                  _ListDATA.removeAt(index);
+                  _ListDATA.remove(element);
                   _GroupDATA[widget.arguments]['list'] = _ListDATA;
                   String newDATA = json.encode(_GroupDATA);
                   _prefs.setString('DATA', newDATA);
@@ -115,15 +112,30 @@ class _BillListState extends State<BillList> {
                         children: <Widget>[
                           ListTile(
                             onTap: () {
+
                               //到消費細節頁
-                              Navigator.pushNamed(context, '/spendDetail',
-                                  arguments: {
-                                    'member': _GroupDATA[widget.arguments]['member'],
-                                    'detail': element,
-                                    'index': index
-                                  });
-                              print('element${element}');
-                              print('index:$index');
+                              if(element['type']=='bill'){
+                                Navigator.pushNamed(context, '/spendDetail',
+                                    arguments: {
+                                      'member': _GroupDATA[widget.arguments]
+                                      ['member'],
+                                      'detail': element,
+                                      'index': index
+                                    });
+                                print('element${element}');
+                                print('index:$index');
+                              }else{
+                                Navigator.pushNamed(context, '/transferDetail',
+                                    arguments: {
+                                      'member': _GroupDATA[widget.arguments]
+                                      ['member'],
+                                      'detail': element,
+                                      'index': index
+                                    });
+                                print('element${element}');
+                                print('index:$index');
+                              }
+
                             }, //點擊,
                             leading: Container(
                               padding: const EdgeInsets.only(right: 15.0),
@@ -145,27 +157,40 @@ class _BillListState extends State<BillList> {
                                   const TextStyle(fontWeight: FontWeight.w500),
                             ),
                             subtitle: Text(
-                                element['totalAmount'] != null
-                                    ? '\$' + element['totalAmount'].toString()
-                                    : '沒有金額',
+                                element['type'] == 'bill'
+                                    ? (element['totalAmount'] != null
+                                        ? '總額\$' +
+                                            element['totalAmount'].toString()
+                                        : '沒有金額')
+                                    : (element['note'] != ''
+                                        ? '轉帳：${element['note']}'
+                                        : '轉帳'),
                                 style: const TextStyle(fontSize: 12)),
                             trailing: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  haveToPay(element) >= 0
-                                      ? const Text('你待付',
-                                          style: TextStyle(
-                                              color: Colors.red, fontSize: 10))
-                                      : const Text('你代墊',
-                                          style: TextStyle(
-                                              color: Colors.blue,
-                                              fontSize: 10)),
-                                  Text(element['sharer'] != [] &&
-                                          element['totalAmount'] != ''
-                                      ? '\$' + haveToPay(element).abs().toString() //先轉絕對值，去除負數符號
-                                      : '\$0')
-                                ]),
+                                children: element['type'] == 'bill'
+                                    ? [
+                                        haveToPay(element) >= 0
+                                            ? const Text('你待付',
+                                                style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontSize: 10))
+                                            : const Text('你代墊',
+                                                style: TextStyle(
+                                                    color: Colors.blue,
+                                                    fontSize: 10)),
+                                        Text(element['sharer'] != [] &&
+                                                element['totalAmount'] != ''
+                                            ? '\$' +
+                                                haveToPay(element)
+                                                    .abs()
+                                                    .toString() //先轉絕對值，去除負數符號
+                                            : '\$0')
+                                      ]
+                                    : [
+                                        Text('\$ ${element['Amount'].toString()}')
+                                      ]),
                           )
                         ],
                       ),

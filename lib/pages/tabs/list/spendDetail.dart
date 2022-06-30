@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SpendDetail extends StatefulWidget {
-  final arguments;
+  final  arguments;
   SpendDetail({Key? key, this.arguments}) : super(key: key);
 
   @override
@@ -11,7 +11,6 @@ class SpendDetail extends StatefulWidget {
 class _SpendDetailState extends State<SpendDetail> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     print(
         'widget.arguments:${widget.arguments != null ? widget.arguments['detail'] : 'no detail'}');

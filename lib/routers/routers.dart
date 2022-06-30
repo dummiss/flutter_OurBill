@@ -28,8 +28,10 @@ final Map<String, Function> routes = {
   '/tabs': (context, {arguments}) => Tabs(arguments: arguments),
   '/add': (context, {arguments}) => BillAdd(arguments: arguments),
   '/spendDetail': (context, {arguments}) => SpendDetail(arguments:arguments),
+  '/transferDetail': (context, {arguments}) => TransferDetail(arguments:arguments),
   '/addPayerEdit': (context, {arguments}) => const AddPayerEdit(),
   '/addSharerEdit': (context, {arguments}) => const AddSharerEdit(),
+  // '/transferEdit': (context, {arguments}) =>  TransferEdit(arguments:arguments),
   //
   // '/debtTransferEdit': (context, {arguments}) => DebtTransferEdit(arguments:arguments),
   //

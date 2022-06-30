@@ -239,7 +239,7 @@ class _BillAddState extends State<BillAdd> {
     _form!.save();
     _setData(); // 存資料到SP
     // Navigator.pop(context, true);
-    (Navigator.popAndPushNamed(context, '/tabs', arguments: widget.arguments));
+    (Navigator.popAndPushNamed(context, '/tabs',arguments: {'index':widget.arguments} ));
     print("_ALLDATA:$_ALLDATA");
     // print(_groupName);
     // print(_member);
@@ -558,7 +558,7 @@ class _BillAddState extends State<BillAdd> {
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.popAndPushNamed(context, '/tabs',
-                                arguments: widget.arguments);
+                                arguments: {'index':widget.arguments} );
                           },
                           child: const Text('取消',
                               style: TextStyle(

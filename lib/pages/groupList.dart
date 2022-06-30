@@ -99,7 +99,7 @@ class _GroupListState extends State<GroupList> {
                           ListTile(
                             onTap: () {
                               Navigator.pushNamed(context, '/tabs',
-                                  arguments: index); //把index傳到下一頁，知道是資料的第幾個
+                                  arguments: {'index':index}); //把index傳到下一頁，知道是資料的第幾個
                             }, //點擊,
                             leading: const CircleAvatar(
                               backgroundColor: Colors.black26,

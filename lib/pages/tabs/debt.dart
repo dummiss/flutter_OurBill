@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../tabs/debt/transferEdit.dart';
 
 class BillDebt extends StatefulWidget {
-  int arguments;
+  int arguments; //index
   BillDebt(this.arguments, {Key? key}) : super(key: key);
 
   @override
@@ -14,10 +15,12 @@ class BillDebt extends StatefulWidget {
 class _BillDebtState extends State<BillDebt> {
   Map _groupDATA = {};
   List<dynamic> _allDATA = [];
-  List _finalCount0 = [{}];
+  List _finalCount = [{}];
   List<Widget> _finalCountList = [];
   List<Widget> _ListTileWidget = [];
-  bool isInit = false;
+  bool isInit = false; //判斷資料是否載入好
+  String owner = "";
+
   @override
   void initState() {
     super.initState();
@@ -28,10 +31,11 @@ class _BillDebtState extends State<BillDebt> {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     _allDATA = json.decode(_prefs.getString('DATA') ?? '');
     _groupDATA = json.decode(_prefs.getString('DATA') ?? '')[widget.arguments];
+    owner = _groupDATA['member'][0];
     print("_GroupDATA:$_groupDATA");
     _countdebt(_groupDATA);
     setState(() {
-      isInit = true;
+      isInit = true; //資料載入成功
     });
   }
 
@@ -39,39 +43,53 @@ class _BillDebtState extends State<BillDebt> {
     //計算出已付款及待付款的總額
     List<dynamic> payerTotal = [];
     List<dynamic> sharerTotal = [];
+    List<dynamic> transferList = [];
+
+    //先給預設值，不然沒資料會無法顯示
+    for (int i = 0; i < _groupDATA['member'].length; i++) {
+      payerTotal.add(0);
+      sharerTotal.add(0);
+      transferList.add(0);
+    }
+
+    //list有資料如下
     _GroupDATA['list'].map((v) {
       List tmp1 = payerTotal;
       List tmp2 = sharerTotal;
-      for (int i = 0; i < v['payer'].length; i++) {
-        if (tmp1.length <= v['payer'].length-1) {
-          payerTotal.add(v['payer'][i]);
-          sharerTotal.add(v['sharer'][i]);
-        } else {
+      List tmp3 = transferList;
+      if (v['type'] == 'bill') {
+        for (int i = 0; i < v['payer'].length; i++) {
           payerTotal[i] = tmp1[i] + v['payer'][i];
           sharerTotal[i] = tmp2[i] + v['sharer'][i];
         }
+      } else if (v['type'] == 'transfer') {
+        for (int i = 0; i < v['transferList'].length; i++) {
+          transferList[i] = tmp3[i] + v['transferList'][i];
+        }
       }
     }).toList();
+
     print('payerTotal:$payerTotal');
     print('sharerTotal:$sharerTotal');
+    print('transferList:$transferList');
 
-    //已付款-待付款＝最後每人負債總額
+    //已付款+轉帳 -待付款＝最後每人負債總額
     for (int i = 0; i < _GroupDATA['member'].length; i++) {
-      double count = payerTotal[i] - sharerTotal[i];
-      if (i == 0) {
-        _finalCount0[0]
-            .putIfAbsent(_GroupDATA['member'][i] + '(我)', () => count);
-      } else {
-        _finalCount0[0].putIfAbsent(_GroupDATA['member'][i], () => count);
-      }
+      num count;
+      count = (payerTotal[i] + transferList[i]) - sharerTotal[i];
+
+      _finalCount[0].putIfAbsent(_GroupDATA['member'][i], () => count);
     }
-    print('finalCount:$_finalCount0');
+    print('finalCount:$_finalCount');
 
     //結餘widget list
-    _finalCount0[0].forEach((key, value) {
+    _finalCount[0].forEach((key, value) {
       _finalCountList.add(Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text(key), Text(value.toString())],
+        children: [
+          Text(key == owner ? '$key(我)' : key),
+          Text(value.toString())
+        ],
       ));
       _finalCountList.add(const Divider(
         thickness: 1,
@@ -79,7 +97,7 @@ class _BillDebtState extends State<BillDebt> {
     });
 
     //分帳
-    var _finalCount = _finalCount0; //複製一份、避免跟上面衝突
+    var _finalCountCopy = _finalCount; //複製一份、避免跟上面衝突
     var bigCreditor; //最大債主
     var bigDebtor; //最大負債人
     var debt = 0; //紀錄比較債務金額
@@ -87,7 +105,7 @@ class _BillDebtState extends State<BillDebt> {
 
     checkDebt() {
       num a = 0;
-      _finalCount[0].forEach((key, value) {
+      _finalCountCopy[0].forEach((key, value) {
         a += value.abs();
       });
       print('絕對值總和:$a');
@@ -96,7 +114,7 @@ class _BillDebtState extends State<BillDebt> {
 
     while (checkDebt() > 0) {
       //找出最大的債主與負債人
-      _finalCount[0].forEach((key, value) {
+      _finalCountCopy[0].forEach((key, value) {
         if (value > debt) {
           bigCreditor = key;
         } else if (value < debt) {
@@ -106,8 +124,8 @@ class _BillDebtState extends State<BillDebt> {
       });
 
       //找出最大債主與負債人中金額最小者
-      var debtAmount = min(_finalCount[0][bigCreditor] as num,
-          -(_finalCount[0][bigDebtor]) as num);
+      var debtAmount = min(_finalCountCopy[0][bigCreditor] as num,
+          -(_finalCountCopy[0][bigDebtor]) as num);
 
       print(debtAmount);
 
@@ -129,36 +147,40 @@ class _BillDebtState extends State<BillDebt> {
             -debtAmount; //若尚未在splitDebt內建立該人相關帳務，需定義第二層的物件，記錄對另一人的債務收付
       }
       //收付款後，更新餘額
-      _finalCount[0][bigCreditor] -= debtAmount;
-      _finalCount[0][bigDebtor] += debtAmount;
+      _finalCountCopy[0][bigCreditor] -= debtAmount;
+      _finalCountCopy[0][bigDebtor] += debtAmount;
       print(splitDebt);
     }
 
     // 債務關係widget list
-
-    // <String, Map<String, double>>
-    // <String, ListTile>
-    //測試中
-    // textWidgets = splitDebt
-    //     .map(
-    //       (key, value) {
-    //         final subMap = value as Map<String, double>;
-    //         var a;
-    //         String str = '';
-    //         subMap.forEach((key, value) {
-    //           str += '$key: $value';
-    //         });
-    //         final t = Text('Leading Key: $Key, SubMap: $str');
-    //         return MapEntry(key, t);
-    //       },
-    //     )
-    //     .values
-    //     .toList();
-
     splitDebt.forEach((key, value) {
       value.forEach((key2, value2) {
-        if(value2>0){
-         _ListTileWidget.add(ListTile(
+        Map data = {
+          'pay': value2.abs(),
+          'payer': key2,
+          'receiver': key,
+        };
+        if (value2 > 0) {
+          _ListTileWidget.add(ListTile(
+            onTap: (() {
+              // Navigator.pushNamed(context, '/transferEdit',arguments: {
+              //   'allData':_allDATA,
+              //   'index':widget.arguments,
+              //   'data':data,
+              // });
+              // TransferEdit(context,_allDATA,widget.arguments);
+
+
+              //路由stack需要些調整
+              showModalBottomSheet<void>(
+                  context: context,
+                  shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular((20)))),
+                  builder: (BuildContext context) {
+                    return TransferEdit(_allDATA, widget.arguments, data);
+                  });
+            }),
             leading: Container(width: 60, child: Center(child: Text(key2))),
             title: Column(
               children: [
@@ -180,36 +202,35 @@ class _BillDebtState extends State<BillDebt> {
                 width: 80,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: [Text(key), Icon(Icons.keyboard_arrow_right)],
+                  children: [Text(key), const Icon(Icons.keyboard_arrow_right)],
                 )),
           ));
         }
-
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return isInit
+    return isInit // 資料載入成功顯示
         ? Padding(
             padding: const EdgeInsets.all(30.0),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     '結餘',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   Column(
                     children: _finalCountList,
                   ),
 
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.only(top: 30, bottom: 10),
                     child: Text(
                       '債務關係',
@@ -220,7 +241,7 @@ class _BillDebtState extends State<BillDebt> {
                   //白色區塊
                   Container(
                       // margin: const EdgeInsets.only(top: 50, left: 10, right: 10),
-                    padding: EdgeInsets.only(top:15,bottom: 15),
+                      padding: const EdgeInsets.only(top: 15, bottom: 15),
                       decoration: const BoxDecoration(
                         boxShadow: [
                           BoxShadow(
@@ -239,6 +260,6 @@ class _BillDebtState extends State<BillDebt> {
               ),
             ),
           )
-        : const SizedBox.shrink();
+        : const SizedBox.shrink(); //資料未載好顯示
   }
 }

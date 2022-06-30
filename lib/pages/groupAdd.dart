@@ -229,7 +229,7 @@ class _GroupAddState extends State<GroupAdd> {
                   const SizedBox(
                     height: 40,
                   ),
-                  Text("DATA:$_DATA"),
+                  // Text("DATA:$_DATA"),
                 ],
               ))),
     );
