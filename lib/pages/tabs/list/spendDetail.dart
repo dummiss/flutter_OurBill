@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 
 class SpendDetail extends StatefulWidget {
-  final  arguments;
+  final arguments;
   SpendDetail({Key? key, this.arguments}) : super(key: key);
+  /*
+  arguments: {
+    'allData': _AllDATA,
+    'groupindex':widget.arguments,
+    'member': _AllDATA[widget.arguments] ['member'],
+    'detail': element,
+ });
+  */
 
   @override
   State<SpendDetail> createState() => _SpendDetailState();
@@ -21,6 +29,29 @@ class _SpendDetailState extends State<SpendDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.delete_forever,
+              size: 30,
+            ),
+            tooltip: 'Open shopping cart',
+            onPressed: () {
+              // handle the press
+            },
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.edit_note,
+              size: 32,
+              color: Color.fromARGB(255, 249, 179, 93),
+            ),
+            tooltip: 'Open shopping cart',
+            onPressed: () {
+              // handle the press
+            },
+          ),
+        ],
         title: const Text('消費明細'),
       ),
       body: Padding(
@@ -81,7 +112,9 @@ class _SpendDetailState extends State<SpendDetail> {
                 TextFormField(
                   enabled: false,
                   controller: TextEditingController()
-                    ..text = widget.arguments['detail']['category']=='null'? '沒有選擇':widget.arguments['detail']['category'],
+                    ..text = widget.arguments['detail']['category'] == 'null'
+                        ? '沒有選擇'
+                        : widget.arguments['detail']['category'],
                   decoration: const InputDecoration(
                       prefixIcon: Text(
                         '類別', //輸入框前綴文字
@@ -152,13 +185,18 @@ class _SpendDetailState extends State<SpendDetail> {
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        children:
-                                            widget.arguments['member'] != null
-                                                ? (widget.arguments['member']
-                                                        as List) //強制轉型
-                                                    .map((item) => Text(item,style: const TextStyle(fontSize: 16,height:1.6),))
-                                                    .toList()
-                                                : [],
+                                        children: widget.arguments['member'] !=
+                                                null
+                                            ? (widget.arguments['member']
+                                                    as List) //強制轉型
+                                                .map((item) => Text(
+                                                      item,
+                                                      style: const TextStyle(
+                                                          fontSize: 16,
+                                                          height: 1.6),
+                                                    ))
+                                                .toList()
+                                            : [],
                                         // children: payer,
                                       ),
                                     ),
@@ -172,8 +210,12 @@ class _SpendDetailState extends State<SpendDetail> {
                                                   null
                                               ? (widget.arguments['detail']
                                                       ['payer'] as List) //強制轉型
-                                                  .map((item) =>
-                                                      Text(item.toString(),style: const TextStyle(fontSize: 16, height:1.6),))
+                                                  .map((item) => Text(
+                                                        item.toString(),
+                                                        style: const TextStyle(
+                                                            fontSize: 16,
+                                                            height: 1.6),
+                                                      ))
                                                   .toList()
                                               : [],
                                         ))
@@ -207,7 +249,10 @@ class _SpendDetailState extends State<SpendDetail> {
                                             widget.arguments['member'] != null
                                                 ? (widget.arguments['member']
                                                         as List) //強制轉型
-                                                    .map((item) => Text(item,style: const TextStyle(fontSize: 16,height:1.6)))
+                                                    .map((item) => Text(item,
+                                                        style: const TextStyle(
+                                                            fontSize: 16,
+                                                            height: 1.6)))
                                                     .toList()
                                                 : [],
                                         // children: payer,
@@ -223,8 +268,12 @@ class _SpendDetailState extends State<SpendDetail> {
                                                   null
                                               ? (widget.arguments['detail']
                                                       ['sharer'] as List) //強制轉型
-                                                  .map((item) =>
-                                                      Text(item.toString(),style: const TextStyle(fontSize: 16, height:1.6),))
+                                                  .map((item) => Text(
+                                                        item.toString(),
+                                                        style: const TextStyle(
+                                                            fontSize: 16,
+                                                            height: 1.6),
+                                                      ))
                                                   .toList()
                                               : [],
                                         ))

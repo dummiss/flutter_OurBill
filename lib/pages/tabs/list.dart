@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:grouped_list/grouped_list.dart';
 import "package:collection/collection.dart"; //引入groupby fn
 
-
 class BillList extends StatefulWidget {
   int arguments; //index
   BillList(this.arguments, {Key? key}) : super(key: key);
@@ -15,8 +14,8 @@ class BillList extends StatefulWidget {
 }
 
 class _BillListState extends State<BillList> {
-  List<dynamic> _GroupDATA = [];
-  List<dynamic> _ListDATA = [];
+  List<dynamic> _AllDATA = [];
+  List<dynamic> _recordListDATA = [];
 
 //  初始化：先從SP讀取資料
   @override
@@ -27,10 +26,10 @@ class _BillListState extends State<BillList> {
 
   _loadDATA() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _GroupDATA = json.decode(_prefs.getString('DATA') ?? '');
-    _ListDATA =
+    _AllDATA = json.decode(_prefs.getString('DATA') ?? '');
+    _recordListDATA =
         json.decode(_prefs.getString('DATA') ?? '')[widget.arguments]['list'];
-    print("_ListDATA:$_ListDATA");
+    print("_GroupListDATA:$_recordListDATA");
     setState(() {});
   }
 
@@ -49,7 +48,7 @@ class _BillListState extends State<BillList> {
         ),
         //使用套件照日期組數排序
         child: GroupedListView<dynamic, String>(
-          elements: _ListDATA,
+          elements: _recordListDATA,
           groupBy: (element) => element['date'],
           useStickyGroupSeparators: true,
           groupComparator: (value1, value2) => value2.compareTo(value1),
@@ -72,9 +71,9 @@ class _BillListState extends State<BillList> {
                   //滑動後要做的事
                   SharedPreferences _prefs =
                       await SharedPreferences.getInstance(); //更新SP
-                  _ListDATA.remove(element);
-                  _GroupDATA[widget.arguments]['list'] = _ListDATA;
-                  String newDATA = json.encode(_GroupDATA);
+                  _recordListDATA.remove(element);
+                  _AllDATA[widget.arguments]['list'] = _recordListDATA;
+                  String newDATA = json.encode(_AllDATA);
                   _prefs.setString('DATA', newDATA);
                   setState(() {});
                 },
@@ -112,30 +111,34 @@ class _BillListState extends State<BillList> {
                         children: <Widget>[
                           ListTile(
                             onTap: () {
-
                               //到消費細節頁
-                              if(element['type']=='bill'){
+                              if (element['type'] == 'bill') {
                                 Navigator.pushNamed(context, '/spendDetail',
                                     arguments: {
-                                      'member': _GroupDATA[widget.arguments]
-                                      ['member'],
+                                      'allData': _AllDATA,
+                                      'groupindex': widget.arguments,
+                                      'member': _AllDATA[widget.arguments]
+                                          ['member'],
                                       'detail': element,
-                                      'index': index
-                                    });
+                                    }).then((value) => value == true
+                                    ? _loadDATA()
+                                    : null); //接收下一頁的回傳值，讓下一頁回到上一頁能刷新頁面;
                                 print('element${element}');
                                 print('index:$index');
-                              }else{
+                              } else {
                                 Navigator.pushNamed(context, '/transferDetail',
                                     arguments: {
-                                      'member': _GroupDATA[widget.arguments]
-                                      ['member'],
+                                      'allData': _AllDATA,
+                                      'groupindex': widget.arguments,
+                                      'member': _AllDATA[widget.arguments]
+                                          ['member'],
                                       'detail': element,
-                                      'index': index
-                                    });
+                                    }).then((value) => value == true
+                                    ? _loadDATA()
+                                    : null); //接收下一頁的回傳值，讓下一頁回到上一頁能刷新頁面;
                                 print('element${element}');
                                 print('index:$index');
                               }
-
                             }, //點擊,
                             leading: Container(
                               padding: const EdgeInsets.only(right: 15.0),
@@ -189,7 +192,8 @@ class _BillListState extends State<BillList> {
                                             : '\$0')
                                       ]
                                     : [
-                                        Text('\$ ${element['Amount'].toString()}')
+                                        Text(
+                                            '\$ ${element['Amount'].toString()}')
                                       ]),
                           )
                         ],
