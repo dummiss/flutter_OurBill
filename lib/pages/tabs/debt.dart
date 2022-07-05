@@ -163,15 +163,6 @@ class _BillDebtState extends State<BillDebt> {
         if (value2 > 0) {
           _ListTileWidget.add(ListTile(
             onTap: (() {
-              // Navigator.pushNamed(context, '/transferEdit',arguments: {
-              //   'allData':_allDATA,
-              //   'index':widget.arguments,
-              //   'data':data,
-              // });
-              // TransferEdit(context,_allDATA,widget.arguments);
-
-
-              //路由stack需要些調整
               showModalBottomSheet<void>(
                   context: context,
                   shape: const RoundedRectangleBorder(

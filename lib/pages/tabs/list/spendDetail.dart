@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:date_format/date_format.dart'; //日期格式化套件
 
 class SpendDetail extends StatefulWidget {
   final arguments;
@@ -17,12 +20,54 @@ class SpendDetail extends StatefulWidget {
 }
 
 class _SpendDetailState extends State<SpendDetail> {
+
+  bool _editCheck = false;
+
+
+
   @override
   void initState() {
     super.initState();
     print(
         'widget.arguments:${widget.arguments != null ? widget.arguments['detail'] : 'no detail'}');
     print('member:${widget.arguments['member']}');
+  }
+
+  _delet() {
+    return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              title: const Text('確定要刪除嗎？'),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('CANCEL'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    SharedPreferences _prefs =
+                        await SharedPreferences.getInstance(); //更新SP
+                    widget.arguments['allData'][widget.arguments['groupindex']]
+                            ['list']
+                        .removeWhere((item) =>
+                            item['billName'] ==
+                            widget.arguments['detail']
+                                ['billName']); //刪掉有跟這個內容相同的東西
+                    String newDATA = json.encode(widget.arguments['allData']);
+                    _prefs.setString('DATA', newDATA);
+                    Navigator.of(context)
+                      ..pop
+                      ..pop()
+                      ..pop();
+                    (Navigator.popAndPushNamed(context, '/tabs',
+                        arguments: {'index': widget.arguments['groupindex']}));
+                  },
+                  child: const Text('確定'),
+                ),
+              ],
+            ));
   }
 
   @override
@@ -35,9 +80,9 @@ class _SpendDetailState extends State<SpendDetail> {
               Icons.delete_forever,
               size: 30,
             ),
-            tooltip: 'Open shopping cart',
+            tooltip: '刪除',
             onPressed: () {
-              // handle the press
+              _delet();
             },
           ),
           IconButton(

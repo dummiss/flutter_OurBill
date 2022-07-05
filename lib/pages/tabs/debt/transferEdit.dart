@@ -7,8 +7,12 @@ class TransferEdit extends StatefulWidget {
   final List allDATA;
   final int index;
   final Map abc;
-  const TransferEdit(this.allDATA, this.index, this.abc, {Key? key,})
-      : super(key: key);
+  const TransferEdit(
+    this.allDATA,
+    this.index,
+    this.abc, {
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<TransferEdit> createState() => _TransferEditState();
@@ -19,7 +23,7 @@ class _TransferEditState extends State<TransferEdit> {
   final GlobalKey<FormState> _addFormKey = GlobalKey<FormState>();
   final TextEditingController _transfermoneyController =
       TextEditingController();
-  final TextEditingController _trabnsnoteController = TextEditingController();
+  final TextEditingController _transnoteController = TextEditingController();
 
   final List transferList = [];
   var _transferAmount;
@@ -53,12 +57,12 @@ class _TransferEditState extends State<TransferEdit> {
             child: child!,
           );
         },
-        initialDate: DateTime.now(),
+        initialDate: (_nowDate ?? DateTime.now()),
         firstDate: DateTime(2020),
         lastDate: DateTime(2100));
 
     setState(() {
-      _nowDate = result;
+      result == null ? null : _nowDate = result;
       debugPrint("_nowDate: $_nowDate");
     });
   }
@@ -81,7 +85,7 @@ class _TransferEditState extends State<TransferEdit> {
     );
 
     setState(() {
-      _nowTime = result;
+      result == null ? null : _nowTime = result;
       debugPrint("_nowTime: $_nowTime");
     });
   }
@@ -90,7 +94,9 @@ class _TransferEditState extends State<TransferEdit> {
     var _form = _addFormKey.currentState;
     _form!.save();
     _setData(); // 存資料到SP
-    // Navigator.pop(context, true);
+    Navigator.of(context)
+      ..pop
+      ..pop(); //清除路由stack
     (Navigator.popAndPushNamed(context, '/tabs',
         arguments: {'index': widget.index}));
   }
@@ -101,8 +107,7 @@ class _TransferEditState extends State<TransferEdit> {
     widget.allDATA[widget.index]['list'].add({
       "type": "transfer",
       "billName": "$_remitter 付給 $_receiver",
-      "date":
-          formatDate(_nowDate ?? DateTime.now(), [yyyy, '年', mm, '月', dd, '日']),
+      "date": formatDate(_nowDate ?? DateTime.now(), [yyyy, '-', mm, '-', dd]),
       "time": (_nowTime ?? TimeOfDay.now()).format(context),
       "remitter": _remitter,
       "receiver": _receiver,
@@ -117,8 +122,7 @@ class _TransferEditState extends State<TransferEdit> {
 
   @override
   Widget build(BuildContext context) {
-    return
-      Form(
+    return Form(
       key: _addFormKey,
       child: Container(
         padding: const EdgeInsets.only(top: 10, right: 20, left: 20),
@@ -156,12 +160,13 @@ class _TransferEditState extends State<TransferEdit> {
                 height: 30,
               ),
               TextFormField(
-                // onChanged: () {},
+                onChanged: (v) {
+                  _transfermoneyController.text = v;
+                },
                 onSaved: (v) {
                   _transferAmount = _transfermoneyController.text;
                 },
-                controller: _transfermoneyController
-                  ..text = '${widget.abc['pay']}',
+               initialValue:_transfermoneyController.text='${widget.abc['pay']}',
                 textAlign: TextAlign.end,
                 style:
                     const TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
@@ -211,22 +216,21 @@ class _TransferEditState extends State<TransferEdit> {
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField(
-                  value: widget.abc['payer'] == '小花(我)'
-                      ? '小花'
-                      : widget.abc['payer'],
+                  value: widget.abc['payer'],
                   onSaved: (value) {
                     _remitter = value.toString();
                     //test 整理成[0,0,0,200]格式
                     transferList[widget.allDATA[widget.index]['member']
-                        .indexOf(value)] = double.parse(_transferAmount);
-
-                    print(transferList);
+                        .indexOf(value)] = double.parse(_transfermoneyController.text );
+                    print('_transferAmount:$_transferAmount');
+                    print('transferList:$transferList');
                   },
                   items: widget.allDATA[widget.index]['member']
                       .map<DropdownMenuItem<String>>((v) {
                     return DropdownMenuItem<String>(child: Text(v), value: v);
                   }).toList(),
                   onChanged: (value) {
+
                     print(value);
                   },
                   decoration: const InputDecoration(
@@ -245,12 +249,11 @@ class _TransferEditState extends State<TransferEdit> {
                     Icons.arrow_drop_down,
                   )),
               DropdownButtonFormField(
-                  //把(我)移除 ！！！！！！！！！！壞掉 改
                   value: widget.abc['receiver'],
                   onSaved: (value) {
                     _receiver = value.toString();
                     transferList[widget.allDATA[widget.index]['member']
-                        .indexOf(value)] =-double.parse(_transferAmount);
+                        .indexOf(value)] = -double.parse(_transfermoneyController.text );
 
                     print(transferList);
                   },
@@ -277,10 +280,13 @@ class _TransferEditState extends State<TransferEdit> {
                     Icons.arrow_drop_down,
                   )),
               TextFormField(
-                onSaved: (v) {
-                  note = _trabnsnoteController.text;
+                onChanged: (v) {
+                  _transnoteController.text = v;
                 },
-                controller: _trabnsnoteController,
+                onSaved: (v) {
+                  note = _transnoteController.text;
+                },
+                controller: _transnoteController,
                 decoration: const InputDecoration(
                     hintText: '點擊以編輯(選填)', // 輸入提示
                     prefixIcon: Text(

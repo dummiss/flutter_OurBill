@@ -178,7 +178,7 @@ class _BillAddState extends State<BillAdd> {
         lastDate: DateTime(2100));
 
     setState(() {
-      _nowDate = result;
+      result == null ? null : _nowDate = result;
       debugPrint("_nowDate: $_nowDate");
     });
   }
@@ -201,7 +201,7 @@ class _BillAddState extends State<BillAdd> {
     );
 
     setState(() {
-      _nowTime = result;
+      result == null ? null : _nowTime = result;
       debugPrint("_nowTime: $_nowTime");
     });
   }
@@ -212,7 +212,7 @@ class _BillAddState extends State<BillAdd> {
     _DATA['list'].add({
       "type": "bill",
       "date":
-          formatDate(_nowDate ?? DateTime.now(), [yyyy, '年', mm, '月', dd, '日']),
+          formatDate(_nowDate ?? DateTime.now(), [yyyy, '-', mm, '-', dd]),
       "time": (_nowTime ?? TimeOfDay.now()).format(context),
       "billName": _billNameValue,
       "totalAmount": _money,
@@ -239,7 +239,8 @@ class _BillAddState extends State<BillAdd> {
     _form!.save();
     _setData(); // 存資料到SP
     // Navigator.pop(context, true);
-    (Navigator.popAndPushNamed(context, '/tabs',arguments: {'index':widget.arguments} ));
+    (Navigator.popAndPushNamed(context, '/tabs',
+        arguments: {'index': widget.arguments}));
     print("_ALLDATA:$_ALLDATA");
     // print(_groupName);
     // print(_member);
@@ -303,7 +304,7 @@ class _BillAddState extends State<BillAdd> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(formatDate(_nowDate ?? DateTime.now(),
-                                  [yyyy, '年', mm, '月', dd, '日'])),
+                                  [yyyy, '-', mm, '-', dd])),
                               const Icon(Icons.arrow_drop_down),
                             ],
                           ),
@@ -558,7 +559,7 @@ class _BillAddState extends State<BillAdd> {
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.popAndPushNamed(context, '/tabs',
-                                arguments: {'index':widget.arguments} );
+                                arguments: {'index': widget.arguments});
                           },
                           child: const Text('取消',
                               style: TextStyle(

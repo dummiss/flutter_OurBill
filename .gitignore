@@ -31,6 +31,9 @@
 .pub/
 /build/
 
+#tmp test
+/lib/pages/tabs/list/transferDetail1.dart
+
 # Web related
 lib/generated_plugin_registrant.dart
 
