@@ -140,6 +140,7 @@ class _TransferDetailState extends State<TransferDetail> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         actions: [

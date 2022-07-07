@@ -88,7 +88,7 @@ class _BillDebtState extends State<BillDebt> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(key == owner ? '$key(我)' : key),
-          Text(value.toString())
+          Text(value.toStringAsFixed(2).toString()) //只顯示到小數點第二位
         ],
       ));
       _finalCountList.add(const Divider(
@@ -105,11 +105,21 @@ class _BillDebtState extends State<BillDebt> {
 
     checkDebt() {
       num a = 0;
+      int b = 0;
       _finalCountCopy[0].forEach((key, value) {
-        a += value.abs();
+        if (value == 0) {
+          b += 1;
+        }
       });
-      print('絕對值總和:$a');
-      return a;
+      if (b == _finalCountCopy[0].length - 1) {
+        return 0;
+      } else {
+        _finalCountCopy[0].forEach((key, value) {
+          a += value.abs();
+        });
+        print('絕對值總和:$a');
+        return a;
+      }
     }
 
     while (checkDebt() > 0) {
@@ -164,12 +174,15 @@ class _BillDebtState extends State<BillDebt> {
           _ListTileWidget.add(ListTile(
             onTap: (() {
               showModalBottomSheet<void>(
+                  isScrollControlled: true,
                   context: context,
                   shape: const RoundedRectangleBorder(
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular((20)))),
                   builder: (BuildContext context) {
-                    return TransferEdit(_allDATA, widget.arguments, data);
+                    return SingleChildScrollView(
+                      child: TransferEdit(_allDATA, widget.arguments, data),
+                    );
                   });
             }),
             leading: Container(width: 60, child: Center(child: Text(key2))),

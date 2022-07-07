@@ -25,16 +25,19 @@ class _BillAddState extends State<BillAdd> {
 
   bool CheckboxValue = false; //checkbox
 
-  var _money = null;
+  var _money=0.0;
   late String _categoryValue;
   late String _noteValue;
   late String _billNameValue;
   late final int _peopleNum = _DATA['member'].length;
-  late double _average;
+  late double _average = 0;
 
-  void _countaverang() {
+  void _countaverang(_money) {
     setState(() {
-      _average = (_money ?? 0) / _peopleNum;
+      _average = (double.parse(_money) / _peopleNum);
+      if (_average.toString().split('.').length > 3) {
+        _average.toStringAsFixed(2);
+      }
     });
   }
 
@@ -110,7 +113,8 @@ class _BillAddState extends State<BillAdd> {
     for (var name in _DATA['member']) {
       if (CheckboxValue == true) {
         final sharerTextField = TextFormField(
-            controller: TextEditingController()..text = "$_average",
+            controller: TextEditingController()
+              ..text = _average.toStringAsFixed(2),
             enabled: false,
             onSaved: (value) {
               value != ""
@@ -211,8 +215,7 @@ class _BillAddState extends State<BillAdd> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     _DATA['list'].add({
       "type": "bill",
-      "date":
-          formatDate(_nowDate ?? DateTime.now(), [yyyy, '-', mm, '-', dd]),
+      "date": formatDate(_nowDate ?? DateTime.now(), [yyyy, '-', mm, '-', dd]),
       "time": (_nowTime ?? TimeOfDay.now()).format(context),
       "billName": _billNameValue,
       "totalAmount": _money,
@@ -236,14 +239,43 @@ class _BillAddState extends State<BillAdd> {
   final GlobalKey<FormState> _addFormKey = GlobalKey<FormState>();
   void _forSubmitted() {
     var _form = _addFormKey.currentState;
+
     _form!.save();
-    _setData(); // 存資料到SP
-    // Navigator.pop(context, true);
-    (Navigator.popAndPushNamed(context, '/tabs',
-        arguments: {'index': widget.arguments}));
-    print("_ALLDATA:$_ALLDATA");
-    // print(_groupName);
-    // print(_member);
+    _checkdebt();
+  }
+
+  _checkdebt() {
+    num a = 0;
+    _payerMoney.forEach((value) {
+      a += value;
+    });
+    if (a < _money || _money==0) {
+      _payerMoney.clear();//重新清空
+      _sharerMoney.clear();
+      return showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+                title: a < _money
+                    ?  Text('付款總額 “少於” 總金額 $a')
+                    : const Text('請輸入金額'),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('確定'),
+                  ),
+                ],
+              ));
+    } else {
+      _setData(); // 存資料到SP
+      // Navigator.pop(context, true);
+      (Navigator.popAndPushNamed(context, '/tabs',
+          arguments: {'index': widget.arguments}));
+      print("_ALLDATA:$_ALLDATA");
+      // print(_groupName);
+      // print(_member);
+    }
   }
 
   @override
@@ -263,8 +295,9 @@ class _BillAddState extends State<BillAdd> {
                       child: ListView(children: [
                     TextFormField(
                       // onChanged: () {},
+                      keyboardType: TextInputType.number,
                       onSaved: (v) {
-                        _money = v;
+
                       },
                       controller: _totalPriceController,
                       textAlign: TextAlign.end,
@@ -286,11 +319,10 @@ class _BillAddState extends State<BillAdd> {
                           prefixIconConstraints: BoxConstraints(
                               minHeight: 25, minWidth: 100) // 輸入框前綴圖標
                           ),
-                      keyboardType: TextInputType.number,
-                      onChanged: (text) {
+                      onChanged: (v) {
                         setState(() {
-                          _money = int.parse(text);
-                          _countaverang();
+                          _money = double.parse(v);
+                          _countaverang(v);
                           print(_money);
                         });
                       },
