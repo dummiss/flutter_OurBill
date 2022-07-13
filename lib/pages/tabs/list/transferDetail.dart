@@ -30,6 +30,7 @@ class _TransferDetailState extends State<TransferDetail> {
   late String _note = widget.arguments['detail']['note'];
   late String _remitter = widget.arguments['detail']['remitter'];
   late String _receiver = widget.arguments['detail']['receiver'];
+  late String owner = widget.arguments['member'][0];
 
   //日期
   DateTime? _nowDate;
@@ -297,7 +298,7 @@ class _TransferDetailState extends State<TransferDetail> {
                     onSaved: (value) {},
                     items: widget.arguments['member']
                         .map<DropdownMenuItem<String>>((v) {
-                      return DropdownMenuItem<String>(child: Text(v), value: v);
+                      return DropdownMenuItem<String>(child: Text(v == owner ? '$v (我)' : v), value: v);
                     }).toList(),
                     onChanged: _editCheck
                         ? (value) {
@@ -325,7 +326,7 @@ class _TransferDetailState extends State<TransferDetail> {
                     onSaved: (value) {},
                     items: widget.arguments['member']
                         .map<DropdownMenuItem<String>>((v) {
-                      return DropdownMenuItem<String>(child: Text(v), value: v);
+                      return DropdownMenuItem<String>(child: Text(v == owner ? '$v (我)' : v), value: v);
                     }).toList(),
                     onChanged: _editCheck
                         ? (value) {

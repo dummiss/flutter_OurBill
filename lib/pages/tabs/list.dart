@@ -17,6 +17,7 @@ class _BillListState extends State<BillList> {
   List<dynamic> _AllDATA = [];
   List<dynamic> _recordListDATA = [];
 
+
 //  初始化：先從SP讀取資料
   @override
   void initState() {
@@ -27,8 +28,7 @@ class _BillListState extends State<BillList> {
   _loadDATA() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     _AllDATA = json.decode(_prefs.getString('DATA') ?? '');
-    _recordListDATA =
-        json.decode(_prefs.getString('DATA') ?? '')[widget.arguments]['list'];
+    _recordListDATA = _AllDATA[widget.arguments]['list'];
     print("_GroupListDATA:$_recordListDATA");
     setState(() {});
   }

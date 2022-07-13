@@ -44,6 +44,7 @@ class _SpendDetailState extends State<SpendDetail> {
   final List<Widget> sharer = [];
   List _payerMoney = [];
   List _sharerMoney = [];
+  late String owner = widget.arguments['member'][0];
 
   //初始化
   @override
@@ -76,9 +77,10 @@ class _SpendDetailState extends State<SpendDetail> {
               : _payerMoney.add(0);
         },
         decoration: InputDecoration(
-            hintText: '請輸入金額', // 輸入提示
             prefixIcon: Text(
-              widget.arguments['member'][i], //輸入框前綴文字
+              widget.arguments['member'][i] == owner
+                  ? '${widget.arguments['member'][i]} (我)'
+                  : widget.arguments['member'][i], //輸入框前綴文字
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w400,
@@ -99,7 +101,9 @@ class _SpendDetailState extends State<SpendDetail> {
           decoration: InputDecoration(
               hintText: '請輸入金額', // 輸入提示
               prefixIcon: Text(
-                widget.arguments['member'][i], //輸入框前綴文字
+                widget.arguments['member'][i] == owner
+                    ? '${widget.arguments['member'][i]} (我)'
+                    : widget.arguments['member'][i], //輸入框前綴文字
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
@@ -129,7 +133,9 @@ class _SpendDetailState extends State<SpendDetail> {
             decoration: InputDecoration(
                 // 輸入提示
                 prefixIcon: Text(
-                  widget.arguments['member'][i], //輸入框前綴文字
+                  widget.arguments['member'][i] == owner
+                      ? '${widget.arguments['member'][i]} (我)'
+                      : widget.arguments['member'][i], //輸入框前綴文字
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
@@ -151,7 +157,9 @@ class _SpendDetailState extends State<SpendDetail> {
             decoration: InputDecoration(
                 hintText: '請輸入金額', // 輸入提示
                 prefixIcon: Text(
-                  widget.arguments['member'][i], //輸入框前綴文字
+                  widget.arguments['member'][i] == owner
+                      ? '${widget.arguments['member'][i]} (我)'
+                      : widget.arguments['member'][i], //輸入框前綴文字
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
@@ -248,7 +256,6 @@ class _SpendDetailState extends State<SpendDetail> {
     var _form = _addFormKey.currentState;
     _form!.save();
     _checkdebt();
-
   }
 
   _delet() {
@@ -293,28 +300,27 @@ class _SpendDetailState extends State<SpendDetail> {
     _payerMoney.forEach((value) {
       a += value;
     });
-    if (a < _money || _money==0) {
-      _payerMoney.clear();//重新清空
+    if (a < _money || _money == 0) {
+      _payerMoney.clear(); //重新清空
       _sharerMoney.clear();
       return showDialog<String>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-            title: a < _money
-                ?  Text('付款總額 “少於” 總金額 $a')
-                : const Text('請輸入金額'),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('確定'),
-              ),
-            ],
-          ));
+                title:
+                    a < _money ? Text('付款總額 “少於” 總金額 $a') : const Text('請輸入金額'),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('確定'),
+                  ),
+                ],
+              ));
     } else {
       _setData(); // 存資料到SP
       _editCheck = false;
-      setState((){});
+      setState(() {});
     }
   }
 

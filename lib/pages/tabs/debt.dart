@@ -87,7 +87,7 @@ class _BillDebtState extends State<BillDebt> {
       _finalCountList.add(Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(key == owner ? '$key(我)' : key),
+          Text(key == owner ? '$key (我)' : key),
           Text(value.toStringAsFixed(2)) //只顯示到小數點第二位
         ],
       ));
@@ -185,7 +185,7 @@ class _BillDebtState extends State<BillDebt> {
                     );
                   });
             }),
-            leading: Container(width: 60, child: Center(child: Text(key2))),
+            leading: Container(width: 60, child: Center(child: Text(key2 == owner ? '$key2 (我)' : key2))),
             title: Column(
               children: [
                 const Text(
@@ -206,7 +206,7 @@ class _BillDebtState extends State<BillDebt> {
                 width: 80,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: [Text(key), const Icon(Icons.keyboard_arrow_right)],
+                  children: [Text(key == owner ? '$key (我)' : key), const Icon(Icons.keyboard_arrow_right)],
                 )),
           ));
         }

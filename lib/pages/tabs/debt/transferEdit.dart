@@ -6,11 +6,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 class TransferEdit extends StatefulWidget {
   final List allDATA;
   final int index;
-  final Map abc;
+  final Map data;
   const TransferEdit(
     this.allDATA,
     this.index,
-    this.abc, {
+    this.data, {
     Key? key,
   }) : super(key: key);
 
@@ -30,6 +30,7 @@ class _TransferEditState extends State<TransferEdit> {
   var note;
   late String _remitter = '';
   late String _receiver = '';
+  late String owner = widget.allDATA[widget.index]['member'][0];
 
   @override
   void initState() {
@@ -166,7 +167,7 @@ class _TransferEditState extends State<TransferEdit> {
                 onSaved: (v) {
                   _transferAmount = _transfermoneyController.text;
                 },
-               initialValue:_transfermoneyController.text='${widget.abc['pay']}',
+               initialValue:_transfermoneyController.text='${widget.data['pay']}',
                 textAlign: TextAlign.end,
                 style:
                     const TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
@@ -216,7 +217,7 @@ class _TransferEditState extends State<TransferEdit> {
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField(
-                  value: widget.abc['payer'],
+                  value: widget.data['payer'],
                   onSaved: (value) {
                     _remitter = value.toString();
                     //test 整理成[0,0,0,200]格式
@@ -227,7 +228,7 @@ class _TransferEditState extends State<TransferEdit> {
                   },
                   items: widget.allDATA[widget.index]['member']
                       .map<DropdownMenuItem<String>>((v) {
-                    return DropdownMenuItem<String>(child: Text(v), value: v);
+                    return DropdownMenuItem<String>(child: Text(v == owner ? '$v (我)' : v), value: v);
                   }).toList(),
                   onChanged: (value) {
 
@@ -249,7 +250,7 @@ class _TransferEditState extends State<TransferEdit> {
                     Icons.arrow_drop_down,
                   )),
               DropdownButtonFormField(
-                  value: widget.abc['receiver'],
+                  value: widget.data['receiver'],
                   onSaved: (value) {
                     _receiver = value.toString();
                     transferList[widget.allDATA[widget.index]['member']
@@ -259,7 +260,7 @@ class _TransferEditState extends State<TransferEdit> {
                   },
                   items: widget.allDATA[widget.index]['member']
                       .map<DropdownMenuItem<String>>((v) {
-                    return DropdownMenuItem<String>(child: Text(v), value: v);
+                    return DropdownMenuItem<String>(child: Text(v == owner ? '$v (我)' : v), value: v);
                   }).toList(),
                   onChanged: (value) {
                     print(value);
