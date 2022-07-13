@@ -33,7 +33,7 @@ class _SpendDetailState extends State<SpendDetail> {
 
   bool CheckboxValue = false; //checkbox
 
-  late var _money = widget.arguments['detail']['totalAmount'];
+  late double _money = widget.arguments['detail']['totalAmount'];
   late String _categoryValue = widget.arguments['detail']['category'];
   late String _noteValue = widget.arguments['detail']['note'];
   late String _billNameValue = widget.arguments['detail']['billName'];
@@ -55,7 +55,7 @@ class _SpendDetailState extends State<SpendDetail> {
 
   void _countaverang(_money) {
     setState(() {
-      _average = (_money/ _peopleNum);
+      _average = (_money / _peopleNum);
       if (_average.toString().split('.').length > 3) {
         _average.toStringAsFixed(2);
       }
@@ -224,7 +224,7 @@ class _SpendDetailState extends State<SpendDetail> {
     var a = widget.arguments['detail'];
     widget.arguments['detail'] = {
       "type": "bill",
-      "date":  formatDate(_nowDate ?? DateTime.now(), [yyyy, '-', mm, '-', dd]),
+      "date": formatDate(_nowDate ?? DateTime.now(), [yyyy, '-', mm, '-', dd]),
       "time": (_nowTime ?? TimeOfDay.now()).format(context),
       "billName": _billNameValue,
       "totalAmount": _money,
@@ -234,13 +234,12 @@ class _SpendDetailState extends State<SpendDetail> {
       "sharer": _sharerMoney,
     };
     widget.arguments['allData'][widget.arguments['groupindex']]['list']
-    [widget.arguments['elementIndex']]=widget.arguments['detail'];
+        [widget.arguments['elementIndex']] = widget.arguments['detail'];
     String jsonGroupDATA = json.encode(widget.arguments['allData']); //轉json
     prefs.setString('DATA', jsonGroupDATA);
 
-    print("jsonGroupDATA:${ widget.arguments['allData'][widget.arguments['groupindex']]['list']
-    [widget.arguments['elementIndex']]}");
-
+    print(
+        "jsonGroupDATA:${widget.arguments['allData'][widget.arguments['groupindex']]['list'][widget.arguments['elementIndex']]}");
   }
 
   //form提交
@@ -248,9 +247,8 @@ class _SpendDetailState extends State<SpendDetail> {
   void _forSubmitted() {
     var _form = _addFormKey.currentState;
     _form!.save();
-    _setData(); // 存資料到SP
-    _editCheck = false;
-    setState((){});
+    _checkdebt();
+
   }
 
   _delet() {
@@ -290,6 +288,36 @@ class _SpendDetailState extends State<SpendDetail> {
             ));
   }
 
+  _checkdebt() {
+    num a = 0;
+    _payerMoney.forEach((value) {
+      a += value;
+    });
+    if (a < _money || _money==0) {
+      _payerMoney.clear();//重新清空
+      _sharerMoney.clear();
+      return showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: a < _money
+                ?  Text('付款總額 “少於” 總金額 $a')
+                : const Text('請輸入金額'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('確定'),
+              ),
+            ],
+          ));
+    } else {
+      _setData(); // 存資料到SP
+      _editCheck = false;
+      setState((){});
+    }
+  }
+
   //確定編輯btn
   _completeBtn() {
     return ElevatedButton(
@@ -312,7 +340,14 @@ class _SpendDetailState extends State<SpendDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle:true,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+        ),
+        centerTitle: true,
         title: const Text(
           '消費明細',
         ),
@@ -353,15 +388,16 @@ class _SpendDetailState extends State<SpendDetail> {
                     TextFormField(
                       onChanged: (v) {
                         setState(() {
-                          _money =  int.parse(v);
-                          _countaverang(_money);
+                          _money = double.parse(v);
+                          _countaverang(v);
                           print(_money);
                         });
                       },
                       enabled: _editCheck,
-                      initialValue: widget.arguments['detail']['totalAmount'].toString(),
+                      initialValue:
+                          widget.arguments['detail']['totalAmount'].toString(),
                       onSaved: (v) {
-                        _money = v;
+                        _money = double.parse(v!);
                       },
                       textAlign: TextAlign.end,
                       style: const TextStyle(
@@ -569,10 +605,12 @@ class _SpendDetailState extends State<SpendDetail> {
                                                     onChanged: (value) {
                                                       _editCheck
                                                           ? setState(() {
-                                                              _countaverang(_money);
+                                                              _countaverang(
+                                                                  _money);
                                                               CheckboxValue =
                                                                   value!;
-                                                              _countaverang(_money);
+                                                              _countaverang(
+                                                                  _money);
                                                               updateSharer();
                                                               debugPrint(
                                                                   '$value $_average');

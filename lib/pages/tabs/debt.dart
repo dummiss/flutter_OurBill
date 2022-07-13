@@ -88,7 +88,7 @@ class _BillDebtState extends State<BillDebt> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(key == owner ? '$key(我)' : key),
-          Text(value.toStringAsFixed(2).toString()) //只顯示到小數點第二位
+          Text(value.toStringAsFixed(2)) //只顯示到小數點第二位
         ],
       ));
       _finalCountList.add(const Divider(
@@ -197,7 +197,7 @@ class _BillDebtState extends State<BillDebt> {
                     child: Image.asset('images/debtArrow.png',
                         fit: BoxFit.fitWidth)),
                 Text(
-                  value2.abs().toString(),
+                  value2.abs().toStringAsFixed(2),
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 )
               ],

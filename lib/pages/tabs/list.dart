@@ -120,7 +120,8 @@ class _BillListState extends State<BillList> {
                                       'member': _AllDATA[widget.arguments]
                                           ['member'],
                                       'detail': element,
-                                      'elementIndex':_recordListDATA.indexOf(element),
+                                      'elementIndex':
+                                          _recordListDATA.indexOf(element),
                                     }).then((value) => value == true
                                     ? _loadDATA()
                                     : null); //接收下一頁的回傳值，讓下一頁回到上一頁能刷新頁面;
@@ -134,7 +135,8 @@ class _BillListState extends State<BillList> {
                                       'member': _AllDATA[widget.arguments]
                                           ['member'],
                                       'detail': element,
-                                      'elementIndex':_recordListDATA.indexOf(element),
+                                      'elementIndex':
+                                          _recordListDATA.indexOf(element),
                                     }).then((value) => value == true
                                     ? _loadDATA()
                                     : null); //接收下一頁的回傳值，讓下一頁回到上一頁能刷新頁面;

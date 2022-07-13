@@ -36,7 +36,7 @@ class _GroupListState extends State<GroupList> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              Navigator.pushNamed(context, '/groupAdd').then((value) =>
+              Navigator.pushNamed(context, '/groupAdd',).then((value) =>
                   value == true
                       ? _loadDATA()
                       : null); //接收下一頁的回傳值，讓下一頁回到上一頁能刷新頁面

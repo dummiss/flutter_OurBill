@@ -244,6 +244,7 @@ class _BillAddState extends State<BillAdd> {
     _checkdebt();
   }
 
+  //檢查金額
   _checkdebt() {
     num a = 0;
     _payerMoney.forEach((value) {

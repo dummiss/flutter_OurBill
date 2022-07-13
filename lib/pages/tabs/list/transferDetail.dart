@@ -143,6 +143,17 @@ class _TransferDetailState extends State<TransferDetail> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+        ),
+        centerTitle: true,
+        title: const Text(
+          '轉帳明細',
+        ),
         actions: [
           IconButton(
             icon: const Icon(
@@ -204,7 +215,6 @@ class _TransferDetailState extends State<TransferDetail> {
             },
           ),
         ],
-        title: const Text('轉帳明細'),
       ),
       body: Padding(
           padding: const EdgeInsets.all(20),
