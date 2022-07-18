@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+//TODO: 移除不必要的import
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../pages/tabs/add.dart';
@@ -7,18 +8,21 @@ import '../pages/tabs/list.dart';
 
 //帳單清單頁面
 class Tabs extends StatefulWidget {
+  //TODO: 如果確認arguments的型別就宣告 盡量不要dynamic
   final arguments; //接收groupList傳過來的arguments:index參數
-  Tabs({Key? key, this.arguments}) : super(key: key);
+  const Tabs({Key? key, this.arguments}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _TabsState(arguments);
 }
 
 class _TabsState extends State<Tabs> {
+  //TODO: 都是final, 可以直接用widget.arguments取得就好, 不用另外宣告
   final arguments;
 
   var _pages = <Widget>[];
 
+  //TODO: 初始化狀態建議寫在override initState, State通常不需要宣告建構子
   //底部導覽切換的頁面
   _TabsState(this.arguments) {
     _pages = <Widget>[
@@ -56,8 +60,10 @@ class _TabsState extends State<Tabs> {
     //問ari 要怎麼藉由這種方式讓建立玩可以重新刷新，這次先把回上一頁取消，直接傳路由的方式刷新
     index == 1
         ? (Navigator.pushReplacementNamed(context, '/add',
-            arguments: arguments['index'])) //直接刪除「前1個」 route，push到新 route，stack就不會有這層
+            arguments:
+                arguments['index'])) //直接刪除「前1個」 route，push到新 route，stack就不會有這層
         : setState(() {
+            //TODO: print資料可以用debugPrint
             print('tabs index:${arguments['index']}'); //test
             _selectedIndex = index;
             tabsTitle = _titles[index];

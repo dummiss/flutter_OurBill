@@ -25,7 +25,7 @@ class _BillAddState extends State<BillAdd> {
 
   bool CheckboxValue = false; //checkbox
 
-  var _money=0.0;
+  var _money = 0.0;
   late String _categoryValue;
   late String _noteValue;
   late String _billNameValue;
@@ -227,6 +227,7 @@ class _BillAddState extends State<BillAdd> {
     print('\n');
     print("_DATA['list'] :${_DATA['list']}");
     _ALLDATA[widget.arguments!] = _DATA;
+    //TODO: Json encode, decode最好加try catch
     String jsonGroupDATA = json.encode(_ALLDATA); //轉json
     print('\n');
     print("_DATA:$_DATA");
@@ -250,15 +251,14 @@ class _BillAddState extends State<BillAdd> {
     _payerMoney.forEach((value) {
       a += value;
     });
-    if (a < _money || _money==0) {
-      _payerMoney.clear();//重新清空
+    if (a < _money || _money == 0) {
+      _payerMoney.clear(); //重新清空
       _sharerMoney.clear();
       return showDialog<String>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-                title: a < _money
-                    ?  Text('付款總額 “少於” 總金額 $a')
-                    : const Text('請輸入金額'),
+                title:
+                    a < _money ? Text('付款總額 “少於” 總金額 $a') : const Text('請輸入金額'),
                 actions: [
                   ElevatedButton(
                     onPressed: () {
@@ -297,9 +297,7 @@ class _BillAddState extends State<BillAdd> {
                     TextFormField(
                       // onChanged: () {},
                       keyboardType: TextInputType.number,
-                      onSaved: (v) {
-
-                      },
+                      onSaved: (v) {},
                       controller: _totalPriceController,
                       textAlign: TextAlign.end,
                       style: const TextStyle(

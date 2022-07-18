@@ -11,12 +11,14 @@ class GroupAdd extends StatefulWidget {
 
 class _GroupAddState extends State<GroupAdd> {
   final _userName = TextEditingController(); //"我的暱稱"控制器
+  //TODO: 沒有初始值建議給型別, 或給初始值
   var _groupName;
 
   List newData = [];
   final List<dynamic> _members = []; //存成員名
 
   //sp
+  //TODO: 沒用到的宣告就刪掉
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   var _DATA;
 
@@ -27,6 +29,7 @@ class _GroupAddState extends State<GroupAdd> {
     _loadDATA();
   }
 
+  //TODO: void
   _loadDATA() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -35,6 +38,7 @@ class _GroupAddState extends State<GroupAdd> {
   }
 
   //新成員init
+  //TODO: 加final
   List<Widget> _newMemberTextFormField = [];
 
   //新成員add方法
@@ -64,6 +68,7 @@ class _GroupAddState extends State<GroupAdd> {
                   //新成員delete
                   _newMemberTextFormField
                       .removeWhere((item) => item.key == key);
+                  //TODO: debugPrint
                   print(_newMemberTextFormField);
                 },
               );
@@ -73,6 +78,7 @@ class _GroupAddState extends State<GroupAdd> {
   }
 
   //"建立"button
+  //TODO: Add return type
   _createButton() {
     return ElevatedButton(
       onPressed: _forSubmitted,
@@ -103,6 +109,7 @@ class _GroupAddState extends State<GroupAdd> {
   //  存資料進Ps裡
   Future<void> _setData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    //TODO: 小駝峰 dataMap
     var DATAmap = json.decode(prefs.getString('DATA') ?? '[]');
     DATAmap.add({
       "group": _groupName,
@@ -110,8 +117,10 @@ class _GroupAddState extends State<GroupAdd> {
       "member": _members,
       "list": [],
     });
+    //TODO: debugPrint
     print("DATAmap :$DATAmap ");
     String DATA = json.encode(DATAmap);
+    //TODO: debugPrint
     print("DATA:$DATA");
     //顯示測試用
     setState(() {

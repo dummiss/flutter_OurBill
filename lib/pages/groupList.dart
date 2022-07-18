@@ -12,6 +12,7 @@ class GroupList extends StatefulWidget {
 
 class _GroupListState extends State<GroupList> {
   //初始化：先從SP讀取資料
+  //TODO: 非常數變數建議小駝峰命名, https://dart-lang.github.io/linter/lints/non_constant_identifier_names.html
   var _DATA;
   @override
   void initState() {
@@ -19,7 +20,9 @@ class _GroupListState extends State<GroupList> {
     _loadDATA();
   }
 
+  //TODO: _loadDATA不回傳變數的話請加void
   _loadDATA() async {
+    //TODO: 這邊跟64行都會用到SharedPreferences的話建議可以拉出一個全域變數, 畢竟是非同步耗時工作, 不建議區域變數多次init
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     setState(() {
       _DATA = json.decode(_prefs.getString('DATA') ?? '[]');
@@ -36,10 +39,12 @@ class _GroupListState extends State<GroupList> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              Navigator.pushNamed(context, '/groupAdd',).then((value) =>
-                  value == true
-                      ? _loadDATA()
-                      : null); //接收下一頁的回傳值，讓下一頁回到上一頁能刷新頁面
+              Navigator.pushNamed(
+                context,
+                '/groupAdd',
+              ).then((value) => value == true
+                  ? _loadDATA()
+                  : null); //接收下一頁的回傳值，讓下一頁回到上一頁能刷新頁面
             },
           ),
         ],
@@ -48,14 +53,17 @@ class _GroupListState extends State<GroupList> {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView.builder(
+            //TODO: _DATA一開始可以初始為空陣列, 這樣就不用在做null判斷
             itemCount: (_DATA != null ? _DATA.length : 0),
             itemBuilder: (context, index) {
+              //TODO: item沒用到就刪掉
               final item = _DATA[index];
               return Dismissible(
                   //滑動刪除
                   key: UniqueKey(), //每一個Dismissible都必須有專屬的key，讓Flutter能夠辨識
                   onDismissed: (direction) async {
                     //滑動後要做的事
+                    //TODO: 同25行
                     SharedPreferences _prefs =
                         await SharedPreferences.getInstance(); //更新SP
                     _DATA.removeAt(index);
@@ -98,8 +106,9 @@ class _GroupListState extends State<GroupList> {
                         children: <Widget>[
                           ListTile(
                             onTap: () {
-                              Navigator.pushNamed(context, '/tabs',
-                                  arguments: {'index':index}); //把index傳到下一頁，知道是資料的第幾個
+                              Navigator.pushNamed(context, '/tabs', arguments: {
+                                'index': index
+                              }); //把index傳到下一頁，知道是資料的第幾個
                             }, //點擊,
                             leading: const CircleAvatar(
                               backgroundColor: Colors.black26,

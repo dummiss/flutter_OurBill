@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../pages/groupList.dart'; //群組列表
 import 'package:splash_screen_view/SplashScreenView.dart'; //splashscreen第三方套件
 
+//TODO: class的命名跟檔名建議要相符
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
 

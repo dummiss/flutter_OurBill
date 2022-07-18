@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'routers/routers.dart'; //路由
+//TODO: 移除不必要的import
 import 'pages/splashScreen.dart';
 import 'routers/routers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+//TODO: 沒用的code就刪掉
 // void main() => runApp(MyApp());
 void main() {
   runApp(MyApp());
 }
 
+//TODO: 原本的建構子有要代入key建議就不要刪掉
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -45,6 +48,8 @@ MaterialColor createMaterialColor(Color color) {
   for (int i = 1; i < 10; i++) {
     strengths.add(0.1 * i);
   }
+  //TODO: 在linter其實是建議forEach裡面不要有function, 有function用for語音上比較清晰
+  //https://dart-lang.github.io/linter/lints/avoid_function_literals_in_foreach_calls.html
   strengths.forEach((strength) {
     final double ds = 0.5 - strength;
     swatch[(strength * 1000).round()] = Color.fromRGBO(

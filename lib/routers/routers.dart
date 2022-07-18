@@ -8,11 +8,12 @@ import '../pages/tabs.dart'; //bottomnavigationbar
 import '../pages/tabs/add.dart';
 import '../pages/tabs/add/payerEdit.dart';
 import '../pages/tabs/add/sharerEdit.dart';
-
+//TODO: 移除不必要的import
 import '../pages/tabs/debt/transferEdit.dart';
 
 import '../pages/tabs/list/spendDetail.dart';
 import '../pages/tabs/list/transferDetail.dart';
+//TODO: 移除不必要的import
 import '../pages/tabs/list/spend/delete.dart';
 import '../pages/tabs/list/spend/edit.dart';
 import '../pages/tabs/list/spend/sharerEdit.dart';
@@ -27,10 +28,12 @@ final Map<String, Function> routes = {
   '/groupAdd': (context, {arguments}) => const GroupAdd(),
   '/tabs': (context, {arguments}) => Tabs(arguments: arguments),
   '/add': (context, {arguments}) => BillAdd(arguments: arguments),
-  '/spendDetail': (context, {arguments}) => SpendDetail(arguments:arguments),
-  '/transferDetail': (context, {arguments}) => TransferDetail(arguments:arguments),
+  '/spendDetail': (context, {arguments}) => SpendDetail(arguments: arguments),
+  '/transferDetail': (context, {arguments}) =>
+      TransferDetail(arguments: arguments),
   '/addPayerEdit': (context, {arguments}) => const AddPayerEdit(),
   '/addSharerEdit': (context, {arguments}) => const AddSharerEdit(),
+  //TODO: 確定沒用的code就刪掉
   // '/transferEdit': (context, {arguments}) =>  TransferEdit(arguments:arguments),
   //
   // '/debtTransferEdit': (context, {arguments}) => DebtTransferEdit(arguments:arguments),
@@ -62,4 +65,5 @@ var onGenerateRoute = (RouteSettings settings) {
       return route;
     }
   }
+  //TODO: 這邊應該也要加else回傳處理
 };
