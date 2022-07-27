@@ -1,24 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../pages/splashScreen.dart'; //封面
-import '../pages/groupList.dart'; //群組列表
-import '../pages/groupAdd.dart'; //群組列表
+import '../pages/splash_screen.dart'; //封面
+import '../pages/group_list.dart'; //群組列表
+import '../pages/group_add.dart'; //群組列表
 import '../pages/tabs.dart'; //bottomnavigationbar
-
 import '../pages/tabs/add.dart';
-import '../pages/tabs/add/payerEdit.dart';
-import '../pages/tabs/add/sharerEdit.dart';
-
-import '../pages/tabs/debt/transferEdit.dart';
-
-import '../pages/tabs/list/spendDetail.dart';
-import '../pages/tabs/list/transferDetail.dart';
-import '../pages/tabs/list/spend/delete.dart';
-import '../pages/tabs/list/spend/edit.dart';
-import '../pages/tabs/list/spend/sharerEdit.dart';
-import '../pages/tabs/list/spend/payerEdit.dart';
-import '../pages/tabs/list/transfer/Delete.dart';
-import '../pages/tabs/list/transfer/Edit.dart';
+import '../pages/tabs/list/spend_detail.dart';
+import '../pages/tabs/list/transfer_detail.dart';
 
 //路由配置
 final Map<String, Function> routes = {
@@ -27,22 +15,9 @@ final Map<String, Function> routes = {
   '/groupAdd': (context, {arguments}) => const GroupAdd(),
   '/tabs': (context, {arguments}) => Tabs(arguments: arguments),
   '/add': (context, {arguments}) => BillAdd(arguments: arguments),
-  '/spendDetail': (context, {arguments}) => SpendDetail(arguments:arguments),
-  '/transferDetail': (context, {arguments}) => TransferDetail(arguments:arguments),
-  '/addPayerEdit': (context, {arguments}) => const AddPayerEdit(),
-  '/addSharerEdit': (context, {arguments}) => const AddSharerEdit(),
-  // '/transferEdit': (context, {arguments}) =>  TransferEdit(arguments:arguments),
-  //
-  // '/debtTransferEdit': (context, {arguments}) => DebtTransferEdit(arguments:arguments),
-  //
-  // '/listSpendDetail': (context, {arguments}) => ListSpendDetail(arguments:arguments),
-  // '/listTransferDetail': (context, {arguments}) =>ListTransferDetail(arguments:arguments),
-  // '/spendDelete': (context, {arguments}) => SpendDelete(arguments:arguments),
-  // '/spendEdit': (context, {arguments}) => SpendEdit(arguments:arguments),
-  // '/spendSharerEdit': (context, {arguments}) => SpendSharerEdit(arguments:arguments),
-  // '/spendPayerEdit': (context, {arguments}) => SpendPayerEdit(arguments:arguments),
-  // '/transferDelete': (context, {arguments}) => TransferDelete(arguments:arguments),
-  // '/transferEdit': (context, {arguments}) => TransferEdit(arguments:arguments),
+  '/spendDetail': (context, {arguments}) => SpendDetail(arguments: arguments),
+  '/transferDetail': (context, {arguments}) =>
+      TransferDetail(arguments: arguments),
 };
 
 //路由傳參
@@ -62,4 +37,5 @@ var onGenerateRoute = (RouteSettings settings) {
       return route;
     }
   }
+  return null;
 };

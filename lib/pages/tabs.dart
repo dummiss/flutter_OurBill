@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import 'package:get/get.dart';
+import '../data/data_holder.dart';
 import '../pages/tabs/add.dart';
 import '../pages/tabs/debt.dart';
 import '../pages/tabs/list.dart';
@@ -8,22 +8,23 @@ import '../pages/tabs/list.dart';
 //帳單清單頁面
 class Tabs extends StatefulWidget {
   final arguments; //接收groupList傳過來的arguments:index參數
-  Tabs({Key? key, this.arguments}) : super(key: key);
+  const Tabs({Key? key, this.arguments}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _TabsState(arguments);
 }
 
 class _TabsState extends State<Tabs> {
-  final arguments;
+  final dataHolder = Get.find<DataHolder>();
 
+  final arguments;
   var _pages = <Widget>[];
 
   //底部導覽切換的頁面
   _TabsState(this.arguments) {
     _pages = <Widget>[
       BillDebt(arguments['index']),
-      BillAdd(), //不跳轉
+      const BillAdd(), //不跳轉
       BillList(arguments['index']),
     ];
   }

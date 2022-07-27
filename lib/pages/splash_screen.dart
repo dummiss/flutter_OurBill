@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../pages/groupList.dart'; //群組列表
+import '../pages/group_list.dart'; //群組列表
 import 'package:splash_screen_view/SplashScreenView.dart'; //splashscreen第三方套件
 
 class Home extends StatelessWidget {
@@ -7,6 +7,7 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       body: SplashScreenView(
         navigateRoute: const GroupList(),

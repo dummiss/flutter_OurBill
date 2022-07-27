@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '/pages/tabs/add/payerEdit.dart';
-import '/pages/tabs/add/sharerEdit.dart';
 import 'package:date_format/date_format.dart'; //日期格式化套件
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart'; //modal套件
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../data/data_holder.dart';
 
 class BillAdd extends StatefulWidget {
   final int? arguments; //接收tab傳過來的arguments:index參數
@@ -15,6 +15,8 @@ class BillAdd extends StatefulWidget {
 }
 
 class _BillAddState extends State<BillAdd> {
+  final dataHolder = Get.find<DataHolder>();
+
   //分帳用
   final TextEditingController _totalPriceController =
       TextEditingController(); //紀錄金額控制器
@@ -23,16 +25,16 @@ class _BillAddState extends State<BillAdd> {
   final TextEditingController _sharerController = TextEditingController();
   final TextEditingController _payerController = TextEditingController();
 
-  bool CheckboxValue = false; //checkbox
+  bool checkBoxValue = false; //checkbox
 
-  var _money=0.0;
+  var _money = 0.0;
   late String _categoryValue;
   late String _noteValue;
   late String _billNameValue;
-  late final int _peopleNum = _DATA['member'].length;
+  late final int _peopleNum = dataFromSp['member'].length;
   late double _average = 0;
 
-  void _countaverang(_money) {
+  void _countAverage(_money) {
     setState(() {
       _average = (double.parse(_money) / _peopleNum);
       if (_average.toString().split('.').length > 3) {
@@ -42,8 +44,7 @@ class _BillAddState extends State<BillAdd> {
   }
 
   //初始化：先從SP讀取資料
-  List<dynamic> _ALLDATA = [];
-  Map<String, dynamic> _DATA = {};
+  Map<String, dynamic> dataFromSp = {};
   @override
   void initState() {
     super.initState();
@@ -52,17 +53,16 @@ class _BillAddState extends State<BillAdd> {
 
   final List<Widget> payer = [];
   final List<Widget> sharer = [];
-  List _payerMoney = [];
-  List _sharerMoney = [];
+  final List _payerMoney = [];
+  final List _sharerMoney = [];
 
   //讀取資料
   Future<void> _loadDATA() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _ALLDATA = await json.decode(_prefs.getString('DATA') ?? '');
-    _DATA = _ALLDATA[widget.arguments!];
-    debugPrint('ADD index:${widget.arguments}  DATA: $_DATA');
+    dataHolder.loadDataFromSP();
+    dataFromSp = dataHolder.data[widget.arguments!];
+    debugPrint('ADD index:${widget.arguments}  dataFromSp: $dataFromSp');
 
-    for (var name in _DATA['member']) {
+    for (var name in dataFromSp['member']) {
       final payerTextField = TextFormField(
         controller: TextEditingController(),
         onSaved: (value) {
@@ -110,8 +110,8 @@ class _BillAddState extends State<BillAdd> {
 
   updateSharer() {
     sharer.clear();
-    for (var name in _DATA['member']) {
-      if (CheckboxValue == true) {
+    for (var name in dataFromSp['member']) {
+      if (checkBoxValue == true) {
         final sharerTextField = TextFormField(
             controller: TextEditingController()
               ..text = _average.toStringAsFixed(2),
@@ -212,8 +212,7 @@ class _BillAddState extends State<BillAdd> {
 
   //  存資料進Ps裡
   Future<void> _setData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    _DATA['list'].add({
+    dataHolder.data[widget.arguments!]['list'].add({
       "type": "bill",
       "date": formatDate(_nowDate ?? DateTime.now(), [yyyy, '-', mm, '-', dd]),
       "time": (_nowTime ?? TimeOfDay.now()).format(context),
@@ -224,15 +223,9 @@ class _BillAddState extends State<BillAdd> {
       "payer": _payerMoney,
       "sharer": _sharerMoney,
     });
-    print('\n');
-    print("_DATA['list'] :${_DATA['list']}");
-    _ALLDATA[widget.arguments!] = _DATA;
-    String jsonGroupDATA = json.encode(_ALLDATA); //轉json
-    print('\n');
-    print("_DATA:$_DATA");
-    print('\n');
-    print("jsonGroupDATA:$jsonGroupDATA");
-    prefs.setString('DATA', jsonGroupDATA);
+    dataHolder.saveDataToSP();
+    debugPrint(
+        "afterAddData['list'] :${dataHolder.data[widget.arguments!]['list']}");
   }
 
   //form提交
@@ -241,24 +234,23 @@ class _BillAddState extends State<BillAdd> {
     var _form = _addFormKey.currentState;
 
     _form!.save();
-    _checkdebt();
+    _checkDebt();
   }
 
   //檢查金額
-  _checkdebt() {
+  _checkDebt() {
     num a = 0;
-    _payerMoney.forEach((value) {
+    for (var value in _payerMoney) {
       a += value;
-    });
-    if (a < _money || _money==0) {
-      _payerMoney.clear();//重新清空
+    }
+    if (a < _money || _money == 0) {
+      _payerMoney.clear(); //重新清空
       _sharerMoney.clear();
       return showDialog<String>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-                title: a < _money
-                    ?  Text('付款總額 “少於” 總金額 $a')
-                    : const Text('請輸入金額'),
+                title:
+                    a < _money ? Text('付款總額 “少於” 總金額 $a') : const Text('請輸入金額'),
                 actions: [
                   ElevatedButton(
                     onPressed: () {
@@ -273,7 +265,7 @@ class _BillAddState extends State<BillAdd> {
       // Navigator.pop(context, true);
       (Navigator.popAndPushNamed(context, '/tabs',
           arguments: {'index': widget.arguments}));
-      print("_ALLDATA:$_ALLDATA");
+      debugPrint("dataFormSp:${dataHolder.data}");
       // print(_groupName);
       // print(_member);
     }
@@ -297,9 +289,7 @@ class _BillAddState extends State<BillAdd> {
                     TextFormField(
                       // onChanged: () {},
                       keyboardType: TextInputType.number,
-                      onSaved: (v) {
-
-                      },
+                      onSaved: (v) {},
                       controller: _totalPriceController,
                       textAlign: TextAlign.end,
                       style: const TextStyle(
@@ -323,8 +313,8 @@ class _BillAddState extends State<BillAdd> {
                       onChanged: (v) {
                         setState(() {
                           _money = double.parse(v);
-                          _countaverang(v);
-                          print(_money);
+                          _countAverage(v);
+                          debugPrint(_money.toString());
                         });
                       },
                     ),
@@ -364,7 +354,7 @@ class _BillAddState extends State<BillAdd> {
                           return DropdownMenuItem(child: Text(v), value: v);
                         }).toList(),
                         onChanged: (value) {
-                          print(value);
+                          debugPrint(value.toString());
                         },
                         decoration: const InputDecoration(
                           prefixIcon: Text(
@@ -464,51 +454,6 @@ class _BillAddState extends State<BillAdd> {
                                             children: payer,
                                           ),
                                         ),
-                                        // Expanded(
-                                        //     flex: 5,
-                                        //     child: FutureBuilder(
-                                        //       future: _loadDATA(),
-                                        //       builder: (context, snapshot) {
-                                        //         if (snapshot.connectionState ==
-                                        //             ConnectionState.done) {
-                                        //           final members =
-                                        //               _DATA['member'] as List;
-                                        //           return Column(
-                                        //               children: members
-                                        //                   .map<Widget>(
-                                        //                     (e) =>
-                                        //                         TextFormField(
-                                        //                       key: Key(e),
-                                        //                       // onSaved: (value) {_DATA[widget.groupIndex]['list']['payer'].add},
-                                        //                       decoration:
-                                        //                           InputDecoration(
-                                        //                               hintText:
-                                        //                                   '請輸入金額', // 輸入提示
-                                        //                               prefixIcon:
-                                        //                                   Text(
-                                        //                                 e, //輸入框前綴文字
-                                        //                                 style:
-                                        //                                     const TextStyle(
-                                        //                                   fontSize:
-                                        //                                       15,
-                                        //                                   fontWeight:
-                                        //                                       FontWeight.w400,
-                                        //                                 ),
-                                        //                               ),
-                                        //                               prefixIconConstraints: const BoxConstraints(
-                                        //                                   minHeight:
-                                        //                                       20,
-                                        //                                   minWidth:
-                                        //                                       100) // 輸入框前綴大小
-                                        //                               ),
-                                        //                     ),
-                                        //                   )
-                                        //                   .toList());
-                                        //         } else {
-                                        //           return const Text('Loading');
-                                        //         }
-                                        //       },
-                                        //     ))
                                       ]),
                                 ],
                               )),
@@ -538,13 +483,12 @@ class _BillAddState extends State<BillAdd> {
                                             child: Column(
                                               children: [
                                                 Row(children: [
-                                                  Text('平分'),
+                                                  const Text('平分'),
                                                   Checkbox(
-                                                    value: CheckboxValue,
+                                                    value: checkBoxValue,
                                                     onChanged: (value) {
                                                       setState(() {
-                                                        this.CheckboxValue =
-                                                            value!;
+                                                        checkBoxValue = value!;
                                                         updateSharer();
                                                         debugPrint(
                                                             '$value $_average');

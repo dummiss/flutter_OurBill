@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:date_format/date_format.dart'; //日期格式化套件
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
+
+import '../../../data/data_holder.dart';
 
 class TransferEdit extends StatefulWidget {
-  final List allDATA;
+  final List allDataFromPreviousPage;
   final int index;
-  final Map data;
+  final Map singleDebtDetail;
   const TransferEdit(
-    this.allDATA,
+    this.allDataFromPreviousPage,
     this.index,
-    this.data, {
+    this.singleDebtDetail, {
     Key? key,
   }) : super(key: key);
 
@@ -19,28 +20,30 @@ class TransferEdit extends StatefulWidget {
 }
 
 class _TransferEditState extends State<TransferEdit> {
+  //GetX
+  final dataHolder = Get.find<DataHolder>();
   //form提交
-  final GlobalKey<FormState> _addFormKey = GlobalKey<FormState>();
-  final TextEditingController _transfermoneyController =
-      TextEditingController();
-  final TextEditingController _transnoteController = TextEditingController();
+  final GlobalKey<FormState> addFormKey = GlobalKey<FormState>();
+  final TextEditingController transferMoneyController = TextEditingController();
+  final TextEditingController transNoteController = TextEditingController();
 
   final List transferList = [];
-  var _transferAmount;
-  var note;
-  late String _remitter = '';
-  late String _receiver = '';
-  late String owner = widget.allDATA[widget.index]['member'][0];
+  late String transferAmount = '';
+  late String note = '';
+  late String remitter = '';
+  late String receiver = '';
+  late String owner = widget.allDataFromPreviousPage[widget.index]['member'][0];
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
-    for (int i = 0; i < widget.allDATA[widget.index]['member'].length; i++) {
+    for (int i = 0;
+        i < widget.allDataFromPreviousPage[widget.index]['member'].length;
+        i++) {
       transferList.add(0);
     }
-    print(transferList);
+    debugPrint('$transferList');
   }
 
   //日期
@@ -92,7 +95,7 @@ class _TransferEditState extends State<TransferEdit> {
   }
 
   void _forSubmitted() {
-    var _form = _addFormKey.currentState;
+    var _form = addFormKey.currentState;
     _form!.save();
     _setData(); // 存資料到SP
     Navigator.of(context)
@@ -102,29 +105,27 @@ class _TransferEditState extends State<TransferEdit> {
         arguments: {'index': widget.index}));
   }
 
-  //存資料進Ps裡
+  //存資料進Ps裡fn
   Future<void> _setData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    widget.allDATA[widget.index]['list'].add({
+    dataHolder.data[widget.index]['list'].add({
       "type": "transfer",
-      "billName": "$_remitter 付給 $_receiver",
+      "billName": "$remitter 付給 $receiver",
       "date": formatDate(_nowDate ?? DateTime.now(), [yyyy, '-', mm, '-', dd]),
       "time": (_nowTime ?? TimeOfDay.now()).format(context),
-      "remitter": _remitter,
-      "receiver": _receiver,
-      "Amount": _transferAmount,
+      "remitter": remitter,
+      "receiver": receiver,
+      "Amount": transferAmount,
       "transferList": transferList,
       "note": note,
     });
-    String jsonGroupDATA = json.encode(widget.allDATA);
-    prefs.setString('DATA', jsonGroupDATA);
-    print(widget.allDATA[widget.index]['list']);
+    dataHolder.saveDataToSP();
+    debugPrint('afterSaveData:${dataHolder.data}');
   }
 
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: _addFormKey,
+      key: addFormKey,
       child: Container(
         padding: const EdgeInsets.only(top: 10, right: 20, left: 20),
         height: 550,
@@ -162,12 +163,13 @@ class _TransferEditState extends State<TransferEdit> {
               ),
               TextFormField(
                 onChanged: (v) {
-                  _transfermoneyController.text = v;
+                  transferMoneyController.text = v;
                 },
                 onSaved: (v) {
-                  _transferAmount = _transfermoneyController.text;
+                  transferAmount = transferMoneyController.text;
                 },
-               initialValue:_transfermoneyController.text='${widget.data['pay']}',
+                initialValue: transferMoneyController.text =
+                    '${widget.singleDebtDetail['payAmount']}',
                 textAlign: TextAlign.end,
                 style:
                     const TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
@@ -217,22 +219,24 @@ class _TransferEditState extends State<TransferEdit> {
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField(
-                  value: widget.data['payer'],
+                  value: widget.singleDebtDetail['payer'],
                   onSaved: (value) {
-                    _remitter = value.toString();
+                    remitter = value.toString();
                     //test 整理成[0,0,0,200]格式
-                    transferList[widget.allDATA[widget.index]['member']
-                        .indexOf(value)] = double.parse(_transfermoneyController.text );
-                    print('_transferAmount:$_transferAmount');
-                    print('transferList:$transferList');
+                    transferList[widget.allDataFromPreviousPage[widget.index]
+                                ['member']
+                            .indexOf(value)] =
+                        double.parse(transferMoneyController.text);
+                    debugPrint('_transferAmount:$transferAmount');
+                    debugPrint('transferList:$transferList');
                   },
-                  items: widget.allDATA[widget.index]['member']
+                  items: widget.allDataFromPreviousPage[widget.index]['member']
                       .map<DropdownMenuItem<String>>((v) {
-                    return DropdownMenuItem<String>(child: Text(v == owner ? '$v (我)' : v), value: v);
+                    return DropdownMenuItem<String>(
+                        child: Text(v == owner ? '$v (我)' : v), value: v);
                   }).toList(),
                   onChanged: (value) {
-
-                    print(value);
+                    debugPrint('$value');
                   },
                   decoration: const InputDecoration(
                     prefixIcon: Text(
@@ -250,20 +254,23 @@ class _TransferEditState extends State<TransferEdit> {
                     Icons.arrow_drop_down,
                   )),
               DropdownButtonFormField(
-                  value: widget.data['receiver'],
+                  value: widget.singleDebtDetail['receiver'],
                   onSaved: (value) {
-                    _receiver = value.toString();
-                    transferList[widget.allDATA[widget.index]['member']
-                        .indexOf(value)] = -double.parse(_transfermoneyController.text );
+                    receiver = value.toString();
+                    transferList[widget.allDataFromPreviousPage[widget.index]
+                                ['member']
+                            .indexOf(value)] =
+                        -double.parse(transferMoneyController.text);
 
-                    print(transferList);
+                    debugPrint('$transferList');
                   },
-                  items: widget.allDATA[widget.index]['member']
+                  items: widget.allDataFromPreviousPage[widget.index]['member']
                       .map<DropdownMenuItem<String>>((v) {
-                    return DropdownMenuItem<String>(child: Text(v == owner ? '$v (我)' : v), value: v);
+                    return DropdownMenuItem<String>(
+                        child: Text(v == owner ? '$v (我)' : v), value: v);
                   }).toList(),
                   onChanged: (value) {
-                    print(value);
+                    debugPrint('$value');
                   },
                   decoration: const InputDecoration(
                     prefixIcon: Text(
@@ -282,12 +289,12 @@ class _TransferEditState extends State<TransferEdit> {
                   )),
               TextFormField(
                 onChanged: (v) {
-                  _transnoteController.text = v;
+                  transNoteController.text = v;
                 },
                 onSaved: (v) {
-                  note = _transnoteController.text;
+                  note = transNoteController.text;
                 },
-                controller: _transnoteController,
+                controller: transNoteController,
                 decoration: const InputDecoration(
                     hintText: '點擊以編輯(選填)', // 輸入提示
                     prefixIcon: Text(

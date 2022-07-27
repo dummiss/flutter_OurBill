@@ -1,7 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
+
+import '../data/data_holder.dart';
 
 class GroupList extends StatefulWidget {
   const GroupList({Key? key}) : super(key: key);
@@ -11,19 +11,15 @@ class GroupList extends StatefulWidget {
 }
 
 class _GroupListState extends State<GroupList> {
+  //放進依賴池子
+  final dataHolder = Get.find<DataHolder>();
+
   //初始化：先從SP讀取資料
-  var _DATA;
   @override
   void initState() {
     super.initState();
-    _loadDATA();
-  }
-
-  _loadDATA() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _DATA = json.decode(_prefs.getString('DATA') ?? '[]');
-    });
+    dataHolder.loadDataFromSP();
+    // setState(() {});
   }
 
   @override
@@ -36,10 +32,14 @@ class _GroupListState extends State<GroupList> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              Navigator.pushNamed(context, '/groupAdd',).then((value) =>
-                  value == true
-                      ? _loadDATA()
-                      : null); //接收下一頁的回傳值，讓下一頁回到上一頁能刷新頁面
+              Navigator.pushNamed(
+                context,
+                '/groupAdd',
+              ).then((value) => value == true
+                  ? setState(() {
+                      dataHolder.loadDataFromSP();
+                    })
+                  : null); //接收下一頁的回傳值，讓下一頁回到上一頁能刷新頁面
             },
           ),
         ],
@@ -48,20 +48,17 @@ class _GroupListState extends State<GroupList> {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView.builder(
-            itemCount: (_DATA != null ? _DATA.length : 0),
+            itemCount: dataHolder.data.length,
             itemBuilder: (context, index) {
-              final item = _DATA[index];
               return Dismissible(
                   //滑動刪除
                   key: UniqueKey(), //每一個Dismissible都必須有專屬的key，讓Flutter能夠辨識
                   onDismissed: (direction) async {
                     //滑動後要做的事
-                    SharedPreferences _prefs =
-                        await SharedPreferences.getInstance(); //更新SP
-                    _DATA.removeAt(index);
-                    String newDATA = json.encode(_DATA);
-                    _prefs.setString('DATA', newDATA);
-                    setState(() {});
+                    setState(() {
+                      dataHolder.data.removeAt(index);
+                      dataHolder.saveDataToSP();
+                    });
                   },
                   direction: DismissDirection.endToStart, //只能從右往左滑
                   background: Container(
@@ -98,8 +95,9 @@ class _GroupListState extends State<GroupList> {
                         children: <Widget>[
                           ListTile(
                             onTap: () {
-                              Navigator.pushNamed(context, '/tabs',
-                                  arguments: {'index':index}); //把index傳到下一頁，知道是資料的第幾個
+                              Navigator.pushNamed(context, '/tabs', arguments: {
+                                'index': index
+                              }); //把index傳到下一頁，知道是資料的第幾個
                             }, //點擊,
                             leading: const CircleAvatar(
                               backgroundColor: Colors.black26,
@@ -109,7 +107,7 @@ class _GroupListState extends State<GroupList> {
                               height: 50,
                               alignment: Alignment.topLeft,
                               child: Text(
-                                '${_DATA[index]['group']}',
+                                '${dataHolder.data[index]['group']}',
                                 style: const TextStyle(fontSize: 20),
                               ),
                             ),
@@ -131,7 +129,7 @@ class _GroupListState extends State<GroupList> {
                                           width: 5,
                                         ),
                                         Text(
-                                            '${_DATA[index]['member'].length}'),
+                                            '${dataHolder.data[index]['member'].length}'),
                                       ],
                                     ),
                                   )

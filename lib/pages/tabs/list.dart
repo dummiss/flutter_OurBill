@@ -1,9 +1,10 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:grouped_list/grouped_list.dart';
-import "package:collection/collection.dart"; //引入groupby fn
+
+import '../../data/data_holder.dart';
 
 class BillList extends StatefulWidget {
   int arguments; //groupindex
@@ -14,8 +15,9 @@ class BillList extends StatefulWidget {
 }
 
 class _BillListState extends State<BillList> {
-  List<dynamic> _AllDATA = [];
-  List<dynamic> _recordListDATA = [];
+  List<dynamic> listDataFromSp = [];
+
+  final dataHolder = Get.find<DataHolder>();
 
 
 //  初始化：先從SP讀取資料
@@ -23,13 +25,13 @@ class _BillListState extends State<BillList> {
   void initState() {
     super.initState();
     _loadDATA();
+
   }
 
   _loadDATA() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _AllDATA = json.decode(_prefs.getString('DATA') ?? '');
-    _recordListDATA = _AllDATA[widget.arguments]['list'];
-    print("_GroupListDATA:$_recordListDATA");
+    dataHolder.loadDataFromSP();
+    listDataFromSp=  dataHolder.data[widget.arguments]['list'];
+    debugPrint("listDataFromSp:$listDataFromSp");
     setState(() {});
   }
 
@@ -38,6 +40,7 @@ class _BillListState extends State<BillList> {
     count = element['sharer'][0] - element['payer'][0];
     return count;
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +51,7 @@ class _BillListState extends State<BillList> {
         ),
         //使用套件照日期組數排序
         child: GroupedListView<dynamic, String>(
-          elements: _recordListDATA,
+          elements: listDataFromSp,
           groupBy: (element) => element['date'],
           useStickyGroupSeparators: true,
           groupComparator: (value1, value2) => value2.compareTo(value1),
@@ -69,12 +72,9 @@ class _BillListState extends State<BillList> {
                 key: UniqueKey(), //每一個Dismissible都必須有專屬的key，讓Flutter能夠辨識
                 onDismissed: (direction) async {
                   //滑動後要做的事
-                  SharedPreferences _prefs =
-                      await SharedPreferences.getInstance(); //更新SP
-                  _recordListDATA.remove(element);
-                  _AllDATA[widget.arguments]['list'] = _recordListDATA;
-                  String newDATA = json.encode(_AllDATA);
-                  _prefs.setString('DATA', newDATA);
+                  listDataFromSp.remove(element);
+                  dataHolder.data[widget.arguments]['list'] = listDataFromSp;
+                  dataHolder.saveDataToSP();
                   setState(() {});
                 },
                 direction: DismissDirection.endToStart, //只能從右往左滑
@@ -115,32 +115,32 @@ class _BillListState extends State<BillList> {
                               if (element['type'] == 'bill') {
                                 Navigator.pushNamed(context, '/spendDetail',
                                     arguments: {
-                                      'allData': _AllDATA,
+                                      'allData':dataHolder.data,
                                       'groupindex': widget.arguments,
-                                      'member': _AllDATA[widget.arguments]
+                                      'member': dataHolder.data[widget.arguments]
                                           ['member'],
                                       'detail': element,
                                       'elementIndex':
-                                          _recordListDATA.indexOf(element),
+                                      listDataFromSp.indexOf(element),
                                     }).then((value) => value == true
-                                    ? _loadDATA()
+                                    ? setState(() {})
                                     : null); //接收下一頁的回傳值，讓下一頁回到上一頁能刷新頁面;
-                                print('element${element}');
+                                print('element$element');
                                 print('index:$index');
                               } else {
                                 Navigator.pushNamed(context, '/transferDetail',
                                     arguments: {
-                                      'allData': _AllDATA,
+                                      'allData': dataHolder.data,
                                       'groupindex': widget.arguments,
-                                      'member': _AllDATA[widget.arguments]
+                                      'member': dataHolder.data[widget.arguments]
                                           ['member'],
                                       'detail': element,
                                       'elementIndex':
-                                          _recordListDATA.indexOf(element),
+                                      listDataFromSp.indexOf(element),
                                     }).then((value) => value == true
-                                    ? _loadDATA()
+                                    ? setState(() {})
                                     : null); //接收下一頁的回傳值，讓下一頁回到上一頁能刷新頁面;
-                                print('element${element}');
+                                print('element$element');
                                 print('index:$index');
                               }
                             }, //點擊,

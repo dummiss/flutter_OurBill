@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
+import 'package:get/get.dart';
 import 'dart:math';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../tabs/debt/transferEdit.dart';
+
+import '../../data/data_holder.dart';
+import '../tabs/debt/transfer_edit.dart';
 
 class BillDebt extends StatefulWidget {
   int arguments; //index
@@ -13,13 +14,14 @@ class BillDebt extends StatefulWidget {
 }
 
 class _BillDebtState extends State<BillDebt> {
-  Map _groupDATA = {};
-  List<dynamic> _allDATA = [];
-  List _finalCount = [{}];
-  List<Widget> _finalCountList = [];
-  List<Widget> _ListTileWidget = [];
+  Map groupDataFromSp = {};
+  final List finalCount = [{}];
+  final List<Widget> finalCountList = [];
+  final List<Widget> listTileWidget = [];
   bool isInit = false; //判斷資料是否載入好
   String owner = "";
+
+  final dataHolder = Get.find<DataHolder>();
 
   @override
   void initState() {
@@ -28,32 +30,31 @@ class _BillDebtState extends State<BillDebt> {
   }
 
   _loadDATA() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _allDATA = json.decode(_prefs.getString('DATA') ?? '');
-    _groupDATA = json.decode(_prefs.getString('DATA') ?? '')[widget.arguments];
-    owner = _groupDATA['member'][0];
-    print("_GroupDATA:$_groupDATA");
-    _countdebt(_groupDATA);
+    dataHolder.loadDataFromSP();
+    groupDataFromSp = dataHolder.data[widget.arguments];
+    owner = groupDataFromSp['member'][0];
+    debugPrint("groupDataFromSp:$groupDataFromSp");
+    _countDebt(groupDataFromSp);
     setState(() {
       isInit = true; //資料載入成功
     });
   }
 
-  _countdebt(_GroupDATA) {
+  _countDebt(groupDataFromSp) {
     //計算出已付款及待付款的總額
     List<dynamic> payerTotal = [];
     List<dynamic> sharerTotal = [];
     List<dynamic> transferList = [];
 
     //先給預設值，不然沒資料會無法顯示
-    for (int i = 0; i < _groupDATA['member'].length; i++) {
+    for (int i = 0; i < groupDataFromSp['member'].length; i++) {
       payerTotal.add(0);
       sharerTotal.add(0);
       transferList.add(0);
     }
 
     //list有資料如下
-    _GroupDATA['list'].map((v) {
+    groupDataFromSp['list'].map((v) {
       List tmp1 = payerTotal;
       List tmp2 = sharerTotal;
       List tmp3 = transferList;
@@ -69,39 +70,39 @@ class _BillDebtState extends State<BillDebt> {
       }
     }).toList();
 
-    print('payerTotal:$payerTotal');
-    print('sharerTotal:$sharerTotal');
-    print('transferList:$transferList');
+    debugPrint('payerTotal:$payerTotal');
+    debugPrint('sharerTotal:$sharerTotal');
+    debugPrint('transferList:$transferList');
 
     //已付款+轉帳 -待付款＝最後每人負債總額
-    for (int i = 0; i < _GroupDATA['member'].length; i++) {
+    for (int i = 0; i < groupDataFromSp['member'].length; i++) {
       num count;
       count = (payerTotal[i] + transferList[i]) - sharerTotal[i];
 
-      _finalCount[0].putIfAbsent(_GroupDATA['member'][i], () => count);
+      finalCount[0].putIfAbsent(groupDataFromSp['member'][i], () => count);
     }
-    print('finalCount:$_finalCount');
+    debugPrint('finalCount:$finalCount');
 
     //結餘widget list
-    _finalCount[0].forEach((key, value) {
-      _finalCountList.add(Row(
+    finalCount[0].forEach((key, value) {
+      finalCountList.add(Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(key == owner ? '$key (我)' : key),
           Text(value.toStringAsFixed(2)) //只顯示到小數點第二位
         ],
       ));
-      _finalCountList.add(const Divider(
+      finalCountList.add(const Divider(
         thickness: 1,
       ));
     });
 
     //分帳
-    var _finalCountCopy = _finalCount; //複製一份、避免跟上面衝突
-    var bigCreditor; //最大債主
-    var bigDebtor; //最大負債人
-    var debt = 0; //紀錄比較債務金額
-    var splitDebt = <String, dynamic>{}; //紀錄最終分帳方式
+    List _finalCountCopy = finalCount; //複製一份、避免跟上面衝突
+    String bigCreditor = ''; //最大債主
+    String bigDebtor = ''; //最大負債人
+    double debt = 0.0; //紀錄比較債務金額
+    Map splitDebt = <String, dynamic>{}; //紀錄最終分帳方式
 
     checkDebt() {
       num a = 0;
@@ -117,7 +118,7 @@ class _BillDebtState extends State<BillDebt> {
         _finalCountCopy[0].forEach((key, value) {
           a += value.abs();
         });
-        print('絕對值總和:$a');
+        debugPrint('絕對值總和:$a');
         return a;
       }
     }
@@ -130,14 +131,14 @@ class _BillDebtState extends State<BillDebt> {
         } else if (value < debt) {
           bigDebtor = key;
         }
-        print('bigCreditor：$bigCreditor 、bigDebtor：$bigDebtor');
+        debugPrint('bigCreditor：$bigCreditor 、bigDebtor：$bigDebtor');
       });
 
       //找出最大債主與負債人中金額最小者
       var debtAmount = min(_finalCountCopy[0][bigCreditor] as num,
           -(_finalCountCopy[0][bigDebtor]) as num);
 
-      print(debtAmount);
+      debugPrint(debtAmount.toString());
 
       //最大債主向最大負債人收款，記錄到debt物件
       if (splitDebt.containsKey(bigCreditor)) {
@@ -159,19 +160,19 @@ class _BillDebtState extends State<BillDebt> {
       //收付款後，更新餘額
       _finalCountCopy[0][bigCreditor] -= debtAmount;
       _finalCountCopy[0][bigDebtor] += debtAmount;
-      print(splitDebt);
+      debugPrint('$splitDebt');
     }
 
     // 債務關係widget list
     splitDebt.forEach((key, value) {
       value.forEach((key2, value2) {
-        Map data = {
-          'pay': value2.abs(),
+        Map singleDebtDetail = {
+          'payAmount': value2.abs(),
           'payer': key2,
           'receiver': key,
         };
         if (value2 > 0) {
-          _ListTileWidget.add(ListTile(
+          listTileWidget.add(ListTile(
             onTap: (() {
               showModalBottomSheet<void>(
                   isScrollControlled: true,
@@ -181,19 +182,22 @@ class _BillDebtState extends State<BillDebt> {
                           BorderRadius.vertical(top: Radius.circular((20)))),
                   builder: (BuildContext context) {
                     return SingleChildScrollView(
-                      child: TransferEdit(_allDATA, widget.arguments, data),
+                      child:
+                          TransferEdit(dataHolder.data, widget.arguments, singleDebtDetail),
                     );
                   });
             }),
-            leading: Container(width: 60, child: Center(child: Text(key2 == owner ? '$key2 (我)' : key2))),
+            leading: SizedBox(
+                width: 70,
+                child: Center(child: Text(key2 == owner ? '$key2 (我)' : key2))),
             title: Column(
               children: [
                 const Text(
                   '須支付',
                   style: TextStyle(fontSize: 14, color: Colors.black54),
                 ),
-                Container(
-                    width: 150,
+                SizedBox(
+                    width: 120,
                     child: Image.asset('images/debtArrow.png',
                         fit: BoxFit.fitWidth)),
                 Text(
@@ -202,11 +206,14 @@ class _BillDebtState extends State<BillDebt> {
                 )
               ],
             ),
-            trailing: Container(
-                width: 80,
+            trailing: SizedBox(
+                width: 100,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: [Text(key == owner ? '$key (我)' : key), const Icon(Icons.keyboard_arrow_right)],
+                  children: [
+                    Text(key == owner ? '$key (我)' : key),
+                    const Icon(Icons.keyboard_arrow_right)
+                  ],
                 )),
           ));
         }
@@ -231,7 +238,7 @@ class _BillDebtState extends State<BillDebt> {
                     height: 20,
                   ),
                   Column(
-                    children: _finalCountList,
+                    children: finalCountList,
                   ),
 
                   const Padding(
@@ -258,7 +265,7 @@ class _BillDebtState extends State<BillDebt> {
                         borderRadius: BorderRadius.all(Radius.circular(15)),
                       ),
                       child: Column(
-                        children: _ListTileWidget,
+                        children: listTileWidget,
                       ))
                 ],
               ),

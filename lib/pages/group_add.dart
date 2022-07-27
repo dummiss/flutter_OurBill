@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
+
+import '../data/data_holder.dart';
 
 class GroupAdd extends StatefulWidget {
   const GroupAdd({Key? key}) : super(key: key);
@@ -10,32 +11,15 @@ class GroupAdd extends StatefulWidget {
 }
 
 class _GroupAddState extends State<GroupAdd> {
-  final _userName = TextEditingController(); //"我的暱稱"控制器
-  var _groupName;
+  final userNameController = TextEditingController();
 
-  List newData = [];
-  final List<dynamic> _members = []; //存成員名
+  String? groupName = '';
+  final List<dynamic> members = []; //存成員名
 
-  //sp
-  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  var _DATA;
-
-  //初始化：先從SP讀取資料
-  @override
-  void initState() {
-    super.initState();
-    _loadDATA();
-  }
-
-  _loadDATA() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _DATA = (_prefs.getString('DATA') ?? "");
-    });
-  }
+  final dataHolder = Get.find<DataHolder>();
 
   //新成員init
-  List<Widget> _newMemberTextFormField = [];
+  final List<Widget> _newMemberTextFormField = [];
 
   //新成員add方法
   void _add() {
@@ -52,7 +36,7 @@ class _GroupAddState extends State<GroupAdd> {
     return TextFormField(
       key: key,
       onSaved: (value) {
-        _members.add(value.toString()); //把成員暱稱存進list
+        members.add(value.toString()); //把成員暱稱存進list
       },
       decoration: InputDecoration(
           hintText: '請輸入成員暱稱',
@@ -64,7 +48,7 @@ class _GroupAddState extends State<GroupAdd> {
                   //新成員delete
                   _newMemberTextFormField
                       .removeWhere((item) => item.key == key);
-                  print(_newMemberTextFormField);
+                  debugPrint('$_newMemberTextFormField');
                 },
               );
             },
@@ -94,41 +78,34 @@ class _GroupAddState extends State<GroupAdd> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   void _forSubmitted() {
     var _form = _formKey.currentState;
-    _members.clear(); //清除成員
+    members.clear(); //清除成員
     _form!.save();
-    _setData(); // 存資料到SP
+    _renewData();
+    dataHolder.saveDataToSP(); // 存資料到SP
     Navigator.pop(context, true);
   }
 
-  //  存資料進Ps裡
-  Future<void> _setData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var DATAmap = json.decode(prefs.getString('DATA') ?? '[]');
-    DATAmap.add({
-      "group": _groupName,
-      "owner": _userName.text,
-      "member": _members,
+  //更新dataHolder資料
+  _renewData() {
+    dataHolder.data.add({
+      "group": groupName,
+      "owner": userNameController.text,
+      "member": members,
       "list": [],
     });
-    print("DATAmap :$DATAmap ");
-    String DATA = json.encode(DATAmap);
-    print("DATA:$DATA");
-    //顯示測試用
-    setState(() {
-      prefs.setString('DATA', DATA);
-      _DATA = DATA;
-    });
+    debugPrint("dataHolder.data:${dataHolder.data}");
   }
 
   //創建群組widget組合
   List<Widget> _createGroup() {
     return [
       TextFormField(
+
         onChanged: (value) {
-          _userName.text = value;
+          userNameController.text = value;
         },
         onSaved: (value) {
-          _members.add(value);
+          members.add(value);
         },
         decoration: const InputDecoration(
             hintText: '點擊以編輯', // 輸入提示
@@ -149,7 +126,7 @@ class _GroupAddState extends State<GroupAdd> {
       ),
       TextFormField(
         onSaved: (value) {
-          _groupName = value;
+          groupName = value;
         },
         decoration: const InputDecoration(
             hintText: '點擊以編輯', // 輸入提示
@@ -173,7 +150,7 @@ class _GroupAddState extends State<GroupAdd> {
       ),
       TextFormField(
         readOnly: true,
-        controller: _userName,
+        controller: userNameController,
         decoration: const InputDecoration(
             suffixIcon: Text(
               '管理員',
